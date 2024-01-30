@@ -34,5 +34,7 @@ Potentially More TBD:
 - Create your own branch with **'git checkout -b your-branch-name'**
 
 ## Pushing Your Local Changes to the GitHub Repo
+- Set your global identity with **'git config --global user.name "Your Name"'** and **'git config --global user.email "your.email@example.com"'**
 - To commit your local changes, use **'git add .'** then **'git commit -m "Your message here"'**
 - To push your local changes to the repo, use **'git push origin your-branch-name'**
+- If you forgot your branch name or want to confirm you are on the right branch, use **'git branch'** to view the list of branches
