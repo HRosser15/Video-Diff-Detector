@@ -8,6 +8,7 @@ Automated video comparison tool using Python and OpenCV. Syncs two video feeds, 
 - Python
 - OpenCV
 - VSCode
+- Git
 - more TBD
 
 ## Prerequisites for contributing to or running this application:
@@ -19,6 +20,13 @@ Python 3.12.1:
 OpenCV: 
 - in your command prompt, run **pip install opencv-contrib-python**.
 <!--- once it finishes, run **pip install caer** -->
+
+VSCode:
+- Download and install from the official VSCode website: https://code.visualstudio.com/download
+
+Git: 
+- Download and install from the offical Git website: https://git-scm.com/downloads
+- Open VSCode, go to extensions, search for '**Git**' and install it.
 
 Potentially More TBD:
 - This will be updated as the application is updated.
