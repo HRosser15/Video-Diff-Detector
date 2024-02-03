@@ -3,25 +3,29 @@ import numpy as np
 
 # TO RUN:
 # open terminal with "CTRL + `"
-# enter 'python pixel_wise_video_sync.py' and press enter
+# enter 'python avg_hash_video_sync.py' and press enter
 # press 'q' to exit the video window
 
+def average_hash(image, hash_size=8):
+    resized = cv.resize(image, (hash_size, hash_size), interpolation=cv.INTER_AREA)
+    gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
+    average = gray.mean()
+    hash_value = (gray > average).astype(np.uint8)
+    return hash_value.flatten()
+
 def find_frame_difference(frame1, frame2):
-    # Convert frames to grayscale for simplicity
-    gray1 = cv.cvtColor(frame1, cv.COLOR_BGR2GRAY)
-    gray2 = cv.cvtColor(frame2, cv.COLOR_BGR2GRAY)  
+    hash1 = average_hash(frame1)
+    hash2 = average_hash(frame2)
 
-    # Find pixel-wise differences in the two frames
-    diff = cv.absdiff(gray1, gray2)
+    hamming_distance = np.sum(hash1 != hash2)
 
-    # Create a binary image, setting pixels above a threshold to white and below to black
-    _, thresholded_diff = cv.threshold(diff, 25, 255, cv.THRESH_BINARY)
+    if hamming_distance > 0:
+        # print(f"Hamming distance for non-matching frame: {hamming_distance}")
+        return True
+    else:
+        # print(f"Hamming distance for matching frame: {hamming_distance}")
+        return False
 
-    # Count the number of non-black pixels in the thresholded_diff
-    non_zero_count = np.count_nonzero(thresholded_diff)
-
-    # Return true if more than 500 non-black pixels are found
-    return non_zero_count > 500
 
 def find_sync_frame(first_frame, base_vid):
     # Reset video capture to the beginning
@@ -71,58 +75,54 @@ def find_matching_frame_number(sync_frame, alt_vid):
 
     return None
 
-def main():
-    # Open video capture for base and alternative videos
-    base_vid = cv.VideoCapture('Videos/scenario_base.mp4')
-    alt_vid = cv.VideoCapture('Videos/scenario_alt2.mp4')
 
-    # Get and set frame rates to match for synchronization
+def main():
+    base_vid = cv.VideoCapture('Videos/scenario_base.mp4')  # instance of base video
+    alt_vid = cv.VideoCapture('Videos/scenario_alt2.mp4')  # instance of alt video
+
+    # Get the frame rate of the base video
     base_frame_rate = base_vid.get(cv.CAP_PROP_FPS)
+    # Set the frame rate of alt_vid2 to match base_vid
     alt_vid.set(cv.CAP_PROP_FPS, base_frame_rate)
 
-    # Capture the first frame of the base video
+    # Capture image of first frame of base_vid
+        # ret - (return) boolean that indicates if the .read operation was successful.
     ret, first_frame = base_vid.read()
 
-    # Find frame numbers where videos are synchronized
     sync_frame_number = find_sync_frame(first_frame, base_vid)
     sync_frame = get_frame_at_number(sync_frame_number, base_vid)
     # cv.imshow('sync frame', sync_frame)
 
     alt_sync_frame_number = find_matching_frame_number(sync_frame, alt_vid)
 
-    # Set the minimum frame number for synchronization
     min_frame_number = min(sync_frame_number, alt_sync_frame_number)
-
-    # Print frame numbers for reference
     # print("min frame number: ", min_frame_number)
     # print("base_frame: ", sync_frame_number)
     # print("alt frame: ", alt_sync_frame_number)
 
-    # Set starting frame numbers for both videos
+    # Set the starting frame number for both videos
     base_vid.set(cv.CAP_PROP_POS_FRAMES, sync_frame_number - min_frame_number)
     alt_vid.set(cv.CAP_PROP_POS_FRAMES, alt_sync_frame_number - min_frame_number)
 
     while True:
-        ret_base, frame_base = base_vid.read()
-        ret_alt, frame_alt = alt_vid.read()
+        ret_base, frame_base = base_vid.read()  # read through the base video
+        ret_alt, frame_alt = alt_vid.read()  # read through the alt video
 
-        if not ret_base or not ret_alt:
+        if not ret_base or not ret_alt:  # if either video ends, break
             break
 
-        # Add text to both videos to indicate which is which
+        # Add text to both videos to signify which is which
         cv.putText(frame_base, "Base Video", (10, 55), cv.FONT_HERSHEY_COMPLEX_SMALL, 0.6, (255, 255, 255), 1)
-        cv.putText(frame_alt, "Alt Video", (10, 55), cv.FONT_HERSHEY_COMPLEX_SMALL, 0.6, (255, 255, 255), 1)
+        cv.putText(frame_alt, "Alt Video", (10, 55), cv.FONT_HERSHEY_COMPLEX_SMALL, 0.6, (255, 255, 255), 1)  # Corrected text here
 
-        # Create a video by concatenating frames of both videos
-        concatenated_frame = np.concatenate((frame_base, frame_alt), axis=1)
+        # Create a video of both videos stitched togetherq
+        concatenated_frame = np.concatenate((frame_base, frame_alt), axis=1)        
 
         cv.imshow('Synchronized Videos', concatenated_frame)
 
-        # Break the loop if 'q' is pressed
         if cv.waitKey(30) & 0xFF == ord('q'):
             break
 
-    # Release video captures and close windows
     base_vid.release()
     alt_vid.release()
     cv.destroyAllWindows()

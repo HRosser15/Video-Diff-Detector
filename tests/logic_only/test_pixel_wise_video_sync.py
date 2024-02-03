@@ -1,10 +1,6 @@
 import cv2 as cv
 import numpy as np
 
-# TO RUN:
-# open terminal with "CTRL + `"
-# enter 'python pixel_wise_video_sync.py' and press enter
-# press 'q' to exit the video window
 
 def find_frame_difference(frame1, frame2):
     # Convert frames to grayscale for simplicity
@@ -72,9 +68,10 @@ def find_matching_frame_number(sync_frame, alt_vid):
     return None
 
 def main():
+
     # Open video capture for base and alternative videos
-    base_vid = cv.VideoCapture('Videos/scenario_base.mp4')
-    alt_vid = cv.VideoCapture('Videos/scenario_alt2.mp4')
+    base_vid = cv.VideoCapture('../../Videos/scenario_base.mp4')
+    alt_vid = cv.VideoCapture('../../Videos/scenario_alt2.mp4')
 
     # Get and set frame rates to match for synchronization
     base_frame_rate = base_vid.get(cv.CAP_PROP_FPS)
@@ -93,39 +90,6 @@ def main():
     # Set the minimum frame number for synchronization
     min_frame_number = min(sync_frame_number, alt_sync_frame_number)
 
-    # Print frame numbers for reference
-    # print("min frame number: ", min_frame_number)
-    # print("base_frame: ", sync_frame_number)
-    # print("alt frame: ", alt_sync_frame_number)
-
-    # Set starting frame numbers for both videos
-    base_vid.set(cv.CAP_PROP_POS_FRAMES, sync_frame_number - min_frame_number)
-    alt_vid.set(cv.CAP_PROP_POS_FRAMES, alt_sync_frame_number - min_frame_number)
-
-    while True:
-        ret_base, frame_base = base_vid.read()
-        ret_alt, frame_alt = alt_vid.read()
-
-        if not ret_base or not ret_alt:
-            break
-
-        # Add text to both videos to indicate which is which
-        cv.putText(frame_base, "Base Video", (10, 55), cv.FONT_HERSHEY_COMPLEX_SMALL, 0.6, (255, 255, 255), 1)
-        cv.putText(frame_alt, "Alt Video", (10, 55), cv.FONT_HERSHEY_COMPLEX_SMALL, 0.6, (255, 255, 255), 1)
-
-        # Create a video by concatenating frames of both videos
-        concatenated_frame = np.concatenate((frame_base, frame_alt), axis=1)
-
-        cv.imshow('Synchronized Videos', concatenated_frame)
-
-        # Break the loop if 'q' is pressed
-        if cv.waitKey(30) & 0xFF == ord('q'):
-            break
-
-    # Release video captures and close windows
-    base_vid.release()
-    alt_vid.release()
-    cv.destroyAllWindows()
 
 if __name__ == '__main__':
     main()

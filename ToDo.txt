@@ -1,0 +1,16 @@
+Video Synchronization:
+* Video Sync Methods can be improved upon by handling situations where the sync 
+  frame chosen contains a difference.
+    - A solution to this could be to identify a sync frame or a segment of 
+      a sync frame that is reliably NOT a difference.
+    - Another solution is to find a new sync frame if the end of the second
+      video is reached before finding a matching frame. This would be less efficient.
+
+* Explore more algorithms (DCT, MH, and radial pHash algorithms)
+
+
+Difference Detection:
+* Explore possible algorithms for difference detection.
+* Explore methods for applying algorithms.
+    - Is it more efficient to segment the screen?
+    - Is it more accurate to segment the screen?
