@@ -59,9 +59,11 @@ Potentially More TBD:
   and
       <p>**git config --global user.email "your.email@example.com"**</p>
 - To stage your local changes, use
-      <p>**git add .** (with the period if you're committing all files in the branch)</p>
+      <p>**git add file1_name.ext file2_name.ext** (if you're staging specific files in the branch)</p> 
+        <p>- This is useful for committing only files you have completed when some files are a WIP.</p>
+        <p>- It is also useful when you have completed a lot of work, and want to separate your commits to make the repo history easier to read</p>
   or
-      <p>**git add file_name.ext** (if you're committing a specific file in the branch)</p>  
+        <p>**git add .** (with the period if you're staging all files in the branch)</p>
 - To commit the staged changes:
       <p>**git commit -m "Your message here"**</p>
 - To push your local changes to the repo, use
