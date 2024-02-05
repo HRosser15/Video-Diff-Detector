@@ -13,20 +13,28 @@ Automated video comparison tool using Python and OpenCV. Syncs two video feeds, 
 
 ## Prerequisites for contributing to or running this application:
 Python 3.12.1: 
-- To check if you have **Python 3.12.1**, run 'python -V' in a command prompt.
+- To check if you have **Python 3.12.1**, run
+      <p>**python -V**</p>
+  in a command prompt.
 - If you don't have it, you can download it from Python's official website: https://www.python.org/downloads/windows/
 - Ensure you customize your installation to add Python to your PATH environment variable.
 
 OpenCV: 
-- in your command prompt, run **pip install opencv-contrib-python**.
+- in your command prompt, run
+      <p>**pip install opencv-contrib-python**</p>
 <!--- once it finishes, run **pip install caer** -->
 
 VSCode:
-- Download and install from the official VSCode website: https://code.visualstudio.com/download
+- Download and install from the official VSCode website if you don't already have it: https://code.visualstudio.com/download
 
 Git: 
-- Download and install from the offical Git website: https://git-scm.com/downloads
-- Open VSCode, go to extensions, search for '**Git**' and install it.
+- Check if you have git installed by using
+          <p>**git --version**</p>
+- If you don't have it or don't have the most recent version, download and install from the offical Git website: https://git-scm.com/downloads
+- Open VSCode, click the extensions button on the left, search for '**Git**' and install it.
+
+Python VSCode Extension:
+- In VSCode, click the extensions button on the left, search for '**Python**', and install it.
 
 Potentially More TBD:
 - This will be updated as the application is updated.
@@ -34,19 +42,31 @@ Potentially More TBD:
 
 ## Cloning the Repository
 - In VSCode, press **"CTRL + `"** to open the terminal.
-- Navigate to the directory you want to clone this repo using **cd path/to/your/directory**.
-- Clone the repo using **'git clone https://github.com/HRosser15/Video-Diff-Detector.git'**.
-- Navigate into the cloned repo using **'cd Video-Diff-Detector'**.
+- Navigate to the directory you want to clone this repo using
+          <p>**cd path/to/your/directory**</p>
+- Clone the repo using
+      <p>**git clone https://github.com/HRosser15/Video-Diff-Detector.git**</p>
+- Navigate into the cloned repo using
+      <p>**cd Video-Diff-Detector'**</p>
 
 ## To Begin Contributing
-- Create your own branch with **'git checkout -b your-branch-name'**.
+- Create your own branch with
+      <p>**git checkout -b your-branch-name**<p>
 
 ## Pushing Your Local Changes to the GitHub Repo
 - If you haven't already, set your global identity with
-    <p>**'git config --global user.name "Your Name"'** </p>
-    and
-    <p>**'git config --global user.email "your.email@example.com"'**.</p>
-- To commit your local changes, use **'git add .'** then **'git commit -m "Your message here"'**.
-- To push your local changes to the repo, use **'git push origin your-branch-name'**.
-- If you forgot your branch name or want to confirm you are on the right branch, use **'git branch'** to view the list of branches.
-- submit a pull request on GitHub in order to merge your branch with the main branch.
+      <p>**git config --global user.name "Your Name"**</p>
+  and
+      <p>**git config --global user.email "your.email@example.com"**</p>
+- To stage your local changes, use
+      <p>**git add .** (with the period if you're committing all files in the branch)</p>
+  or
+      <p>**git add file_name.ext** (if you're committing a specific file in the branch)</p>  
+- To commit the staged changes:
+      <p>**git commit -m "Your message here"**</p>
+- To push your local changes to the repo, use
+      <p>**git push origin your-branch-name**</p>
+- If you forgot your branch name or want to confirm you are on the right branch, use
+      <p>**git branch**</p>
+  to view the list of branches.
+- To merge your branch with the main branch, **Submit a pull request on GitHub** and wait for someone to review it.
