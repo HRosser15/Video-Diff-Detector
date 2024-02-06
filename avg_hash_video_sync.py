@@ -91,7 +91,9 @@ def main():
 
     sync_frame_number = find_sync_frame(first_frame, base_vid)
     sync_frame = get_frame_at_number(sync_frame_number, base_vid)
-    # cv.imshow('sync frame', sync_frame)
+    print("Sync frame number: ", sync_frame_number)
+    cv.imshow('sync frame', sync_frame)
+
 
     alt_sync_frame_number = find_matching_frame_number(sync_frame, alt_vid)
 

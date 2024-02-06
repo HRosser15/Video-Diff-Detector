@@ -20,10 +20,10 @@ def find_frame_difference(frame1, frame2):
     # Count the number of non-black pixels in the thresholded_diff
     non_zero_count = np.count_nonzero(thresholded_diff)
 
-    # Return true if more than 500 non-black pixels are found
-    return non_zero_count > 500
+    # Return true if more than 200 non-black pixels are found
+    return non_zero_count > 200
 
-def find_sync_frame(first_frame, base_vid):
+def find_sync_frame_number(first_frame, base_vid):
     # Reset video capture to the beginning
     base_vid.set(cv.CAP_PROP_POS_FRAMES, 0)
 
@@ -84,9 +84,10 @@ def main():
     ret, first_frame = base_vid.read()
 
     # Find frame numbers where videos are synchronized
-    sync_frame_number = find_sync_frame(first_frame, base_vid)
+    sync_frame_number = find_sync_frame_number(first_frame, base_vid)
     sync_frame = get_frame_at_number(sync_frame_number, base_vid)
-    # cv.imshow('sync frame', sync_frame)
+    print("sync frame number: ", sync_frame_number)
+    cv.imshow('sync frame', sync_frame)
 
     alt_sync_frame_number = find_matching_frame_number(sync_frame, alt_vid)
 
@@ -94,9 +95,9 @@ def main():
     min_frame_number = min(sync_frame_number, alt_sync_frame_number)
 
     # Print frame numbers for reference
-    # print("min frame number: ", min_frame_number)
-    # print("base_frame: ", sync_frame_number)
-    # print("alt frame: ", alt_sync_frame_number)
+    print("min frame number: ", min_frame_number)
+    print("base_frame: ", sync_frame_number)
+    print("alt frame: ", alt_sync_frame_number)
 
     # Set starting frame numbers for both videos
     base_vid.set(cv.CAP_PROP_POS_FRAMES, sync_frame_number - min_frame_number)
