@@ -1,14 +1,16 @@
 import cv2 as cv
 import numpy as np
 
+# The only difference between this script and pixelwise_video_sync.py is
+# that the gray frame is created before calling different functions.
+
 # TO RUN:
 # open terminal with "CTRL + `"
 # enter 'python demo3_pixelwise_video_sync.py' and press enter
 # press 'q' to exit the video window
 
-def find_frame_difference(frame1, frame2):
-    # Convert frames to grayscale for simplicity
-    gray1 = cv.cvtColor(frame1, cv.COLOR_BGR2GRAY)
+def find_frame_difference(gray1, frame2):
+    # Convert frames to grayscale for simplicityx
     gray2 = cv.cvtColor(frame2, cv.COLOR_BGR2GRAY)  
 
     # Find pixel-wise differences in the two frames
@@ -24,9 +26,8 @@ def find_frame_difference(frame1, frame2):
     threshold = 50
     return non_zero_count > threshold
 
-def find_matching_frame(frame1, frame2):
+def find_matching_frame(gray1, frame2):
     # Convert frames to grayscale for simplicity
-    gray1 = cv.cvtColor(frame1, cv.COLOR_BGR2GRAY)
     gray2 = cv.cvtColor(frame2, cv.COLOR_BGR2GRAY)  
 
     # Find pixel-wise differences in the two frames
@@ -107,6 +108,10 @@ def main():
 
     # Capture the first frame of the base video
     ret, first_frame = base_vid.read()
+
+    # Convert it to grayscale for simplicity
+    first_frame = cv.cvtColor(first_frame, cv.COLOR_BGR2GRAY)  
+    
     
     # Find frame numbers where videos are synchronized
     sync_frame_number = find_sync_frame_number(first_frame, base_vid)
@@ -114,6 +119,9 @@ def main():
     # Get the frame at the sync_frame_number
     sync_frame = get_frame_at_number(sync_frame_number, base_vid)
     print("Base video reference frame found at frame number: ", sync_frame_number)
+
+    # Convert it to grayscale for simplicity
+    sync_frame = cv.cvtColor(sync_frame, cv.COLOR_BGR2GRAY)
     
     # Find the frame number in the alt video that contains the sync frame
     alt_sync_frame_number = find_matching_frame_number(sync_frame, alt_vid)
