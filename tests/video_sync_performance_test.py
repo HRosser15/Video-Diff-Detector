@@ -7,9 +7,12 @@ from logic_only.test_simple_subtraction_video_sync import main as simple_subtrac
 from logic_only.test_fpixelwise_video_sync import main as fpixelwise_simplified_main
 
 # TO RUN:
-# open terminal with "CTRL + `"
-# enter 'python tests\\video_sync_performance_test.py' and press enter
-# press 'q' to exit the video window
+# Open terminal with "CTRL + `"
+# WINDOWS: enter 'python Tests\\video_sync_performance_test.py' and press enter
+# MAC/LINUX: enter 'python Tests/video_sync_performance_test.py' and press enter
+
+# TO TERMINATE:
+# Enter 'CTRL+C' in terminal while script is running
 
 def measure_execution_time(program_path):
     execution_times = []
