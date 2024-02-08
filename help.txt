@@ -1,13 +1,12 @@
 ## What are each of these programs?
-- Any program that ends in video_sync.py is a video synchronizer. Whatever comes before that is the method used for comparing frames for synchronization. So avg_hash uses the average hash, pixelwise uses pixelwise difference, and so on.
-- f_pixelwise_video_sync.py is identical to pixelwise_video_sync.py but it is slightly faster as it converts some frames to grayscale before the program enters a loop.
+- f_pixelwise.py is identical to pixelwise.py but it is slightly faster as it converts some frames to grayscale before the program enters a loop.
 
 - Demo1 is a video player with no synchronization.
 - Demo2 is the pixelwise video sync, but it shows every step the program takes to synchronize the videos.
-- Demo3 is identical to pixelwise_video_sync.py but has looser thresholds.
+- Demo3 is identical to pixelwise.py but has looser thresholds.
 
-- tests/logic_only contains scripts that use different methods for video synchronization. These specific scripts don't show any windows and don't print anything out. They are solely for testing execution time.
-- tests/logs contains logs of the execution time of the tests in tests/logic_only. The average execution time is logged at the bottom line of each file.
+- Tests/logic_only contains scripts that use different methods for video synchronization. These specific scripts don't show any windows and don't print anything out. They are solely for testing execution time.
+- Tests/logs contains logs of the execution time of the tests in tests/logic_only. The average execution time is logged at the bottom line of each file.
 
 - optical_flow_analysis detects object movement in the video. It doesn't seem great for our use case due to the simplicity of our videos, but we can play around with it. We may be able to increase its sensitivity and use the annotations it makes to check for differences in each video and create bounding boxes or something.
 
