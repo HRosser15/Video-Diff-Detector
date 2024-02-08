@@ -4,6 +4,7 @@ import subprocess
 from logic_only.test_avg_hash_video_sync import main as avg_hash_simplified_main
 from logic_only.test_pixel_wise_video_sync import main as pixelwise_simplified_main
 from logic_only.test_simple_subtraction_video_sync import main as simple_subtraction_simplified_main
+from logic_only.test_fpixelwise_video_sync import main as fpixelwise_simplified_main
 
 # TO RUN:
 # open terminal with "CTRL + `"
@@ -13,7 +14,7 @@ from logic_only.test_simple_subtraction_video_sync import main as simple_subtrac
 def measure_execution_time(program_path):
     execution_times = []
 
-    for _ in range(1000):
+    for _ in range(10000):
         start_time = time.time()
         subprocess.run(['python', program_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         end_time = time.time()
@@ -36,18 +37,19 @@ def measure_execution_time(program_path):
 
 def main():
     script_path = os.path.abspath(__file__)
+    logs_directory = os.path.join(os.path.dirname(script_path), 'logs')
 
     # Measure execution time for avg_hash_video_sync.py
     avg_hash_program_path = 'logic_only/test_avg_hash_video_sync.py'
     measure_execution_time(avg_hash_program_path)
-
+    
     # Measure execution time for pixelwise_video_sync.py
     pixelwise_program_path = 'logic_only/test_pixelwise_video_sync.py'
     measure_execution_time(pixelwise_program_path)
 
-    # # Measure execution time for pixelwise_video_sync.py
-    # dct_phash_program_path = 'logic_only/test_dct_phash_video_sync.py'
-    # measure_execution_time(dct_phash_program_path)
+    # Measure execution time for pixelwise_video_sync.py
+    fpixelwise_program_path = 'logic_only/test_fpixelwise_video_sync.py'
+    measure_execution_time(fpixelwise_program_path)
 
      # Measure execution time for simple_subtraction_video_sync.py
     simple_subtraction_program_path = 'logic_only/test_simple_subtraction_video_sync.py'

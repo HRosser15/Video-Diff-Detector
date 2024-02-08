@@ -102,9 +102,11 @@ def main():
     # print("base_frame: ", sync_frame_number)
     # print("alt frame: ", alt_sync_frame_number)
 
-    # Set the starting frame number for both videos
-    base_vid.set(cv.CAP_PROP_POS_FRAMES, sync_frame_number - min_frame_number)
-    alt_vid.set(cv.CAP_PROP_POS_FRAMES, alt_sync_frame_number - min_frame_number)
+    # # Set the starting frame number for both videos
+    # base_vid.set(cv.CAP_PROP_POS_FRAMES, sync_frame_number - min_frame_number)
+    # alt_vid.set(cv.CAP_PROP_POS_FRAMES, alt_sync_frame_number - min_frame_number)
+    base_vid.set(cv.CAP_PROP_POS_FRAMES, 285)
+    alt_vid.set(cv.CAP_PROP_POS_FRAMES, 282)
 
     while True:
         ret_base, frame_base = base_vid.read()  # read through the base video

@@ -1,21 +1,23 @@
 import cv2 as cv
 import numpy as np
 
+# The only difference between this script and pixelwise_video_sync.py is
+# that the gray frame is created before calling different functions.
+
+
 # TO RUN:
 # open terminal with "CTRL + `"
-# enter 'python pixel_wise_video_sync.py' and press enter
+# enter 'python fpixel_wise_video_sync.py' and press enter
 # press 'q' to exit the video window
 
-def find_frame_difference(frame1, frame2):
+def find_frame_difference(gray1, frame2):
     # Convert frames to grayscale for simplicity
-    gray1 = cv.cvtColor(frame1, cv.COLOR_BGR2GRAY)
     gray2 = cv.cvtColor(frame2, cv.COLOR_BGR2GRAY)  
 
     # Find pixel-wise differences in the two frames
     diff = cv.absdiff(gray1, gray2)
-
     # Create a binary image, setting pixels above a threshold to white and below to black
-    _, thresholded_diff = cv.threshold(diff, 25, 255, cv.THRESH_BINARY)
+    _, thresholded_diff = cv.threshold(diff, 50, 255, cv.THRESH_BINARY)
 
     # Count the number of non-black pixels in the thresholded_diff
     non_zero_count = np.count_nonzero(thresholded_diff)
@@ -23,22 +25,21 @@ def find_frame_difference(frame1, frame2):
     # Return true if more than 100 non-black pixels are found
     return non_zero_count > 200
 
-def find_matching_frame(frame1, frame2):
+def find_matching_frame(gray1, frame2):
     # Convert frames to grayscale for simplicity
-    gray1 = cv.cvtColor(frame1, cv.COLOR_BGR2GRAY)
     gray2 = cv.cvtColor(frame2, cv.COLOR_BGR2GRAY)  
 
     # Find pixel-wise differences in the two frames
     diff = cv.absdiff(gray1, gray2)
 
     # Create a binary image, setting pixels above a threshold to white and below to black
-    _, thresholded_diff = cv.threshold(diff, 25, 255, cv.THRESH_BINARY)
+    _, thresholded_diff = cv.threshold(diff, 10, 255, cv.THRESH_BINARY)
 
     # Count the number of non-black pixels in the thresholded_diff
     non_zero_count = np.count_nonzero(thresholded_diff)
 
-    # Return true if more than 200 non-black pixels are found
-    return non_zero_count > 10
+    # Return true if less than 50 non-black pixels are found
+    return non_zero_count < 20
 
 def find_sync_frame_number(first_frame, base_vid):
     # Reset video capture to the beginning
@@ -83,7 +84,7 @@ def find_matching_frame_number(sync_frame, alt_vid):
         frame_number += 1
 
         # Return the frame number if a matching frame is found
-        if not find_matching_frame(sync_frame, frame):
+        if find_matching_frame(sync_frame, frame):
             return frame_number
 
     return None
@@ -99,13 +100,15 @@ def main():
 
     # Capture the first frame of the base video
     ret, first_frame = base_vid.read()
+    
+    first_frame = cv.cvtColor(first_frame, cv.COLOR_BGR2GRAY)
 
     # Find frame numbers where videos are synchronized
     sync_frame_number = find_sync_frame_number(first_frame, base_vid)
     sync_frame = get_frame_at_number(sync_frame_number, base_vid)
-
-    alt_sync_frame_number = find_matching_frame_number(sync_frame, alt_vid)
     
+    sync_frame_gray = cv.cvtColor(sync_frame, cv.COLOR_BGR2GRAY)
+    alt_sync_frame_number = find_matching_frame_number(sync_frame_gray, alt_vid)
     
     # Release video captures and close windows
     base_vid.release()

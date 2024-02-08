@@ -6,34 +6,40 @@ import numpy as np
 # enter 'python demo3_pixelwise_video_sync.py' and press enter
 # press 'q' to exit the video window
 
-def find_frame_difference(frame1, frame2):
+def find_frame_difference(gray1, frame2):
     # Convert frames to grayscale for simplicity
-    gray1 = cv.cvtColor(frame1, cv.COLOR_BGR2GRAY)
     gray2 = cv.cvtColor(frame2, cv.COLOR_BGR2GRAY)  
 
     # Find pixel-wise differences in the two frames
     diff = cv.absdiff(gray1, gray2)
+    # cv.imshow('diff', diff)
+    # cv.waitKey(30)
 
     # Create a binary image, setting pixels above a threshold to white and below to black
     _, thresholded_diff = cv.threshold(diff, 50, 255, cv.THRESH_BINARY)
+    # cv.imshow('thresholded_diff', thresholded_diff)
+    # cv.waitKey(30)
 
     # Count the number of non-black pixels in the thresholded_diff
     non_zero_count = np.count_nonzero(thresholded_diff)
 
     # Return true if more than "threshold" non-black pixels are found
-    threshold = 50
+    threshold = 200
     return non_zero_count > threshold
 
-def find_matching_frame(frame1, frame2):
+def find_matching_frame(gray1, frame2):
     # Convert frames to grayscale for simplicity
-    gray1 = cv.cvtColor(frame1, cv.COLOR_BGR2GRAY)
     gray2 = cv.cvtColor(frame2, cv.COLOR_BGR2GRAY)  
 
     # Find pixel-wise differences in the two frames
     diff = cv.absdiff(gray1, gray2)
+    # cv.imshow('alt diff', diff)
+    # cv.waitKey(30)
 
     # Create a binary image, setting pixels above a threshold to white and below to black
     _, thresholded_diff = cv.threshold(diff, 10, 255, cv.THRESH_BINARY)
+    # cv.imshow('alt thresholded_diff', thresholded_diff)
+    # cv.waitKey(30)
 
     # Count the number of non-black pixels in the thresholded_diff
     non_zero_count = np.count_nonzero(thresholded_diff)
@@ -49,17 +55,16 @@ def find_sync_frame_number(first_frame, base_vid):
     frame_number = 0
 
     while True:
-        # Read the next frame
         ret, frame = base_vid.read()
 
-        # If no frame is found, break the loop
         if not ret:
             break
 
         frame_number += 1
 
-        # If a non-matching frame is found, return the current frame number
+        # If a non-matching frame is found, print the frame number and return
         if find_frame_difference(first_frame, frame):
+            # print(f"Non-matching frame found at frame number {frame_number}")
             return frame_number
 
     return None
@@ -67,11 +72,8 @@ def find_sync_frame_number(first_frame, base_vid):
 def get_frame_at_number(frame_number, vid):
     # Set video capture to the specified frame number
     vid.set(cv.CAP_PROP_POS_FRAMES, frame_number)
-
-    # Read the frame at the specified frame number
     ret, frame = vid.read()
     
-    # Return the frame if found, otherwise return None
     if ret:
         return frame
     else:
@@ -81,10 +83,8 @@ def find_matching_frame_number(sync_frame, alt_vid):
     frame_number = 0
 
     while True:
-        # Read the next frame
         ret, frame = alt_vid.read()
 
-        # If no frame is found, break the loop
         if not ret:
             break
 
@@ -107,19 +107,27 @@ def main():
 
     # Capture the first frame of the base video
     ret, first_frame = base_vid.read()
+    # cv.imshow('first frame', first_frame)
+    # cv.waitKey(0)
     
+    first_frame = cv.cvtColor(first_frame, cv.COLOR_BGR2GRAY)
+    # cv.imshow('first frame', first_frame)
+    # cv.waitKey(0)
+
     # Find frame numbers where videos are synchronized
     sync_frame_number = find_sync_frame_number(first_frame, base_vid)
-
-    # Get the frame at the sync_frame_number
     sync_frame = get_frame_at_number(sync_frame_number, base_vid)
     print("Base video reference frame found at frame number: ", sync_frame_number)
+    # cv.imshow('reference frame', sync_frame)
+    # cv.waitKey(0)
+
     
-    # Find the frame number in the alt video that contains the sync frame
-    alt_sync_frame_number = find_matching_frame_number(sync_frame, alt_vid)
+    sync_frame_gray = cv.cvtColor(sync_frame, cv.COLOR_BGR2GRAY)
+    alt_sync_frame_number = find_matching_frame_number(sync_frame_gray, alt_vid)
+    
     print("Alt video reference frame found at frame number: ", alt_sync_frame_number)
 
-    # find the minimum frame number
+    # Set the minimum frame number for synchronization
     min_frame_number = min(sync_frame_number, alt_sync_frame_number)
 
     # Print frame numbers for reference
@@ -142,9 +150,7 @@ def main():
         frame_base = cv.copyMakeBorder(frame_base, 10, 50, 10, 10, cv.BORDER_CONSTANT, value=(255, 255, 255))
         frame_alt = cv.copyMakeBorder(frame_alt, 10, 50, 10, 10, cv.BORDER_CONSTANT, value=(255, 255, 255))
 
-        # Add text below each video to indicate which is which.
-        # We can replace this with a variable that holds the name of the video
-        #   and we can take user input on the CLI for the variable.
+        # Add text below each video to indicate which is which
         cv.putText(frame_base, "Video 1", (100, frame_base.shape[0] - 20), cv.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 0), 1)
         cv.putText(frame_alt, "Video 2", (100, frame_alt.shape[0] - 20), cv.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 0), 1)
 
@@ -153,7 +159,6 @@ def main():
 
         cv.imshow('Synchronized Videos', concatenated_frame)
 
-        # play frames with 30 ms delay between each frame
         # Break the loop if 'q' is pressed
         if cv.waitKey(30) & 0xFF == ord('q'):
             break

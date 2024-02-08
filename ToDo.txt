@@ -1,16 +1,43 @@
-Video Synchronization:
+____Video Synchronization:
+ISSUE 1:
 * Video Sync Methods can be improved upon by handling situations where the sync 
-  frame chosen contains a difference.
-    - A solution to this could be to identify a sync frame or a segment of 
-      a sync frame that is reliably NOT a difference.
-    - Another solution is to find a new sync frame if the end of the second
+  frame chosen contains a difference (if this is the case, a matching frame 
+  won't be found in the alt video).
+
+  ===UPDATE: Joseph said there won't be any differences at the start of the video, 
+  ===so we should need to worry about this item.
+  Proposed solutions: (outdated, but keeping for record)
+    • We may want to rely on using the timestamp at the bottom of the video to 
+      sync up frames. This might be more reliable and would be faster since
+      we would only be scanning a small number of pixels. However, due to the
+      low quality of the video, this may not work with a high enough confidence
+      threshold.
+    • Another solution to this could be to identify a sync frame or a segment of 
+      a sync frame that is reliably NOT a difference (like the heading line that 
+      pops up around 10 seconds).
+    • Another solution is to find a new sync frame if the end of the second
       video is reached before finding a matching frame. This would be less efficient.
+  
+ISSUE 2:
+* Explore more algorithms
+  ===UPDATE: DCT was explored and is not a good option.
+            Average hash and simple subtraction were tested and performed similarly 
+            to pixelwise.
 
-* Explore more algorithms (DCT, MH, and radial pHash algorithms)
-
-
-Difference Detection:
+######################################################################################
+____Difference Detection:
+ISSUE 3:
 * Explore possible algorithms for difference detection.
+    • Block Mean Value Based Image Perceptual Hash (dHash)
+    • Contour and Shape Analysis
+    • Pre-trained Deep Learning-based Models such as:
+        - You Only Look Once (Tested and not great, but we can train a model)
+        - Single Shot Multibox Detector
+
+ISSUE 4:
 * Explore methods for applying algorithms.
-    - Is it more efficient to segment the screen?
-    - Is it more accurate to segment the screen?
+    • Is it more efficient to segment the screen?
+    • Is it more accurate to segment the screen?
+
+ISSUE 5: 
+* How do we plan on annotating the differences we detect?
