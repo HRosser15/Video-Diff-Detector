@@ -77,8 +77,8 @@ def find_matching_frame_number(sync_frame, alt_vid):
 
 
 def main():
-    base_vid = cv.VideoCapture('Videos/scenario_base.mp4')  # instance of base video
-    alt_vid = cv.VideoCapture('Videos/scenario_alt2.mp4')  # instance of alt video
+    base_vid = cv.VideoCapture('../../Videos/scenario_base.mp4')  # instance of base video
+    alt_vid = cv.VideoCapture('../../Videos/scenario_alt2.mp4')  # instance of alt video
 
     # Get the frame rate of the base video
     base_frame_rate = base_vid.get(cv.CAP_PROP_FPS)
