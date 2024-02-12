@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+import time
 
 def frame_difference(frame1, frame2, threshold=25):
     # Convert frames to grayscale for simplicity
@@ -8,6 +9,7 @@ def frame_difference(frame1, frame2, threshold=25):
 
     # Find pixel-wise differences in the two frames
     diff = cv.absdiff(gray1, gray2)
+
 
     # Create a binary image, setting pixels above a threshold to white and below to black
     _, thresholded_diff = cv.threshold(diff, threshold, 255, cv.THRESH_BINARY)
@@ -21,7 +23,7 @@ def frame_difference(frame1, frame2, threshold=25):
 
     return thresholded_diff, contours
 
-def visualize_difference(frame1, frame2, diff_image, contours, diff_value):
+def visualize_difference(frame1, frame2, diff_image, contours, diff_value, duration):
     # Copy frames to avoid modifying the original frames
     frame1_with_border = frame1.copy()
     frame2_with_border = frame2.copy()
@@ -49,9 +51,8 @@ def visualize_difference(frame1, frame2, diff_image, contours, diff_value):
     # Display the difference image
     cv.imshow('Difference Image', diff_image)
 
-    # Print the calculated difference value
-    print(f'Difference Value: {diff_value}')
-
+    # Print the calculated difference value and duration
+    print(f'Difference Value: {diff_value}, Duration: {duration} seconds')
 
 def main():
     video1_path = '../../Videos/scenario_base.mp4'
@@ -69,6 +70,9 @@ def main():
     cap1.set(cv.CAP_PROP_POS_FRAMES, 3)
     cap2.set(cv.CAP_PROP_POS_FRAMES, 0)
 
+    start_time = None
+    duration_threshold = 5  # Set the duration threshold in seconds
+
     while True:
         ret1, frame1 = cap1.read()
         ret2, frame2 = cap2.read()
@@ -82,8 +86,17 @@ def main():
 
         # Check if any differences are found
         if contours:
-            # Visualize the differences
-            visualize_difference(frame1, frame2, diff_image, contours, len(contours))
+            if start_time is None:
+                start_time = time.time()
+
+            # Calculate the duration of the difference
+            duration = time.time() - start_time
+
+            # Visualize the differences only if the duration exceeds the threshold
+            if duration >= duration_threshold:
+                # Visualize the differences
+                visualize_difference(frame1, frame2, diff_image, contours, len(contours), duration)
+                start_time = None  # Reset the timer
 
         # Press 'q' to exit
         if cv.waitKey(1) & 0xFF == ord('q'):
