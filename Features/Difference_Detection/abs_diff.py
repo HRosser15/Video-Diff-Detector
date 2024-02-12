@@ -66,7 +66,7 @@ def main():
     
     # Set starting frame for each video (we will adjust this by passing in the 
     # synchronization frames found in the video synchronizer)
-    cap1.set(cv.CAP_PROP_POS_FRAMES, 3)
+    cap1.set(cv.CAP_PROP_POS_FRAMES, 4)
     cap2.set(cv.CAP_PROP_POS_FRAMES, 0)
 
     while True:

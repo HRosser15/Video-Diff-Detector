@@ -2,7 +2,7 @@ import cv2 as cv
 import numpy as np
 import time
 
-def frame_difference(frame1, frame2, threshold=25):
+def frame_difference(frame1, frame2, threshold=5):
     # Convert frames to grayscale for simplicity
     gray1 = cv.cvtColor(frame1, cv.COLOR_BGR2GRAY)
     gray2 = cv.cvtColor(frame2, cv.COLOR_BGR2GRAY)
@@ -18,7 +18,7 @@ def frame_difference(frame1, frame2, threshold=25):
     contours, _ = cv.findContours(thresholded_diff, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     
     # Filter out small contours
-    min_contour_area = 50  # Adjust this value based on your requirements
+    min_contour_area = 10  # Adjust this value based on your requirements
     contours = [contour for contour in contours if cv.contourArea(contour) > min_contour_area]
 
     return thresholded_diff, contours
@@ -62,12 +62,12 @@ def main():
     cap2 = cv.VideoCapture(video2_path)
 
     if not (cap1.isOpened() and cap2.isOpened()):
-        print("Error: Unable to open videos.")
+        print("No more frames to read. Terminating Process")
         return
     
     # Set starting frame for each video (we will adjust this by passing in the 
     # synchronization frames found in the video synchronizer)
-    cap1.set(cv.CAP_PROP_POS_FRAMES, 3)
+    cap1.set(cv.CAP_PROP_POS_FRAMES, 4)
     cap2.set(cv.CAP_PROP_POS_FRAMES, 0)
 
     start_time = None
