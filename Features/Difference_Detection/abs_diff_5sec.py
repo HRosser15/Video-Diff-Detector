@@ -2,7 +2,7 @@ import cv2 as cv
 import numpy as np
 import time
 
-def frame_difference(frame1, frame2, threshold=5):
+def frame_difference(frame1, frame2, threshold=25):
     # Convert frames to grayscale for simplicity
     gray1 = cv.cvtColor(frame1, cv.COLOR_BGR2GRAY)
     gray2 = cv.cvtColor(frame2, cv.COLOR_BGR2GRAY)
@@ -18,7 +18,7 @@ def frame_difference(frame1, frame2, threshold=5):
     contours, _ = cv.findContours(thresholded_diff, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     
     # Filter out small contours
-    min_contour_area = 10  # Adjust this value based on your requirements
+    min_contour_area = 10  
     contours = [contour for contour in contours if cv.contourArea(contour) > min_contour_area]
 
     return thresholded_diff, contours
