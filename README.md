@@ -36,7 +36,6 @@ Git:
 - Check if you have git installed by using
           ```git --version```
 - If you don't have it or don't have the most recent version, download and install from the offical Git website: https://git-scm.com/downloads
-- Open VSCode, click the extensions button on the left, search for ```Git``` and install it.
 
 Python VSCode Extension:
 - In VSCode, click the extensions button on the left, search for ```Python```, and install it.
