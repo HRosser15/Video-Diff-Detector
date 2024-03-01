@@ -44,7 +44,7 @@ def visualize_difference(frame1, frame2, diff_image, contours, diff_value):
 
     # Display the frames with rectangles, borders, and text
     cv.imshow('Synchronized Videos', np.hstack((frame1_with_border, frame2_with_border)))
-    cv.waitKey(0)
+    cv.waitKey(30)
 
     # Display the difference image
     cv.imshow('Difference Image', diff_image)
@@ -85,10 +85,7 @@ def main():
             # Visualize the differences
             visualize_difference(frame1, frame2, diff_image, contours, len(contours))
 
-        # Press 'q' to exit
-        if cv.waitKey(1) & 0xFF == ord('q'):
-            break
-
+        
     cap1.release()
     cap2.release()
 

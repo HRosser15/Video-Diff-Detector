@@ -5,7 +5,8 @@ import numpy as np
 # combination of the two.
 
 '''This function is not sensitive enough to detect small changes in the video.
-It is not a viable option for the project with the thresholds I tried.'''
+It is not a viable option for the project with the thresholds I tried.
+We may be able to adjust it to get it working.'''
 
 def histogram_difference(frame1, frame2):
     hist1 = cv.calcHist([frame1], [0], None, [256], [0, 256])

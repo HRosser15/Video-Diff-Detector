@@ -9,19 +9,37 @@ import numpy as np
 def find_frame_difference(frame1, frame2):
     # Convert frames to grayscale for simplicity
     gray1 = cv.cvtColor(frame1, cv.COLOR_BGR2GRAY)
-    gray2 = cv.cvtColor(frame2, cv.COLOR_BGR2GRAY)  
+    gray2 = cv.cvtColor(frame2, cv.COLOR_BGR2GRAY)
+
+    # Display the original frames
+    cv.imshow('Frame 1', gray1)
+    cv.imshow('Frame 2', gray2)
+    key = cv.waitKey(0)
+
+    # Save the original frames if 's' is pressed
+    if key == ord('s'):
+        cv.imwrite('frame1.png', gray1)
+        cv.imwrite('frame2.png', gray2)
 
     # Find pixel-wise differences in the two frames
     diff = cv.absdiff(gray1, gray2)
     diff_resized = rescaleFrame(diff, 3)
-    cv.imshow('diff', diff_resized)
-    cv.waitKey(10)
+    cv.imshow('Difference', diff_resized)
+    key = cv.waitKey(0)
+
+    # Save the difference image if 's' is pressed
+    if key == ord('s'):
+        cv.imwrite('difference.png', diff_resized)
 
     # Create a binary image, setting pixels above a threshold to white and below to black
     _, thresholded_diff = cv.threshold(diff, 125, 255, cv.THRESH_BINARY)
     thresholded_diff_resized = rescaleFrame(thresholded_diff, 3)
-    cv.imshow('thresholded_diff', thresholded_diff_resized)
-    cv.waitKey(10)
+    cv.imshow('Thresholded Difference', thresholded_diff_resized)
+    key = cv.waitKey(0)
+
+    # Save the thresholded difference image if 's' is pressed
+    if key == ord('s'):
+        cv.imwrite('thresholded_difference.png', thresholded_diff_resized)
 
     # Count the number of non-black pixels in the thresholded_diff
     non_zero_count = np.count_nonzero(thresholded_diff)
