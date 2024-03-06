@@ -46,7 +46,7 @@ def visualize_difference(frame1, frame2, diff_image, contours, diff_value, durat
 
     # Display the frames with rectangles, borders, and text
     cv.imshow('Synchronized Videos', np.hstack((frame1_with_border, frame2_with_border)))
-    cv.waitKey(0)
+    # cv.waitKey(0)
 
     # Display the difference image
     cv.imshow('Difference Image', diff_image)
@@ -71,7 +71,7 @@ def main():
     cap2.set(cv.CAP_PROP_POS_FRAMES, 0)
 
     start_time = None
-    duration_threshold = 5  # Set the duration threshold in seconds
+    duration_threshold = 3  # Set the duration threshold in seconds
 
     while True:
         ret1, frame1 = cap1.read()

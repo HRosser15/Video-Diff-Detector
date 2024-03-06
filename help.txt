@@ -17,4 +17,4 @@
     - For video_sync_performance_test.py, it's in the test folder, so you can just use 'cd tests'. to step out of a folder you can use 'cd ..'
     - You can also include the path in the command, but this is different for different OS.
         * For Windows, \\ is used. 'python tests\\video_sync_performance_test.py'
-        * For Mac/Linux / is used. 'python tests/video_sync_performance_test.py'
+        * For Mac orLinux / is used. 'python tests/video_sync_performance_test.py'

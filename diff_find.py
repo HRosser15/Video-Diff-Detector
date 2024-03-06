@@ -71,10 +71,6 @@ def main():
     cap2 = cv.VideoCapture(full_video2_path)
 
     if not (cap1.isOpened() and cap2.isOpened()):
-        print("difference detected at frame: ", diff_detect_frame)
-        print("total frame count: ", total_frame_count)
-        frames_present = total_frame_count - diff_detect_frame
-        print(f"Difference present for {frames_present} frames")
         print("No more frames to read. Terminating Process")
         return
     
@@ -87,9 +83,11 @@ def main():
     duration_threshold_frames = int(frame_rate * 5)  # Set the duration threshold in frames
 
     frame_count = 0
-    diff_detect_frame = 0
+    diff_start_frame=0
     total_frame_count = 0
-    frames_present = 0
+    five_sec_flag = False
+    temp_frame1 = cap1.read()
+    temp_frame2 = cap2.read()
 
     while True:
         ret1, frame1 = cap1.read()
@@ -108,23 +106,23 @@ def main():
             frame_count += 1
 
             if frame_count == 1:
-                diff_detect_frame = total_frame_count
+                diff_start_frame = total_frame_count
             
 
             # Visualize the differences only if the frame count exceeds the threshold
-            
-        if not contours and frame_count < 150:
-            frame_count = 0
-                
+            if frame_count > duration_threshold_frames:
+                five_sec_flag = True
+                temp_frame1 = frame1
+                temp_frame2 = frame2
 
-        if not contours and frame_count >= 150:
-            visualize_difference(frame1, frame2, diff_image, contours, len(contours), frame_count)
-            print("difference detected at frame: ", diff_detect_frame)
+        elif not contours and five_sec_flag:
+            # Visualize the differences
+            visualize_difference(temp_frame1, temp_frame2, diff_image, contours, len(contours), frame_count)
+            print("diff start frame: ", diff_start_frame)
             print("total frame count: ", total_frame_count)
-            frames_present = total_frame_count - diff_detect_frame
-            print(f"Difference present for {frames_present} frames")
-            frame_count = 0
-            print("got to not contour")
+
+            frame_count = 0  # Reset the frame count
+            five_sec_flag = False
 
         # Press 'q' to exit
         if cv.waitKey(1) & 0xFF == ord('q'):
