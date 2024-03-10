@@ -12,7 +12,7 @@ def main():
     base_start_frame, alt_start_frame = map(int, sync_output.split())
 
     # Call difference detection script with relevant information as arguments
-    subprocess.run(['python', 'diff_find.py', video1_path, video2_path, str(base_start_frame), str(alt_start_frame)])
+    subprocess.run(['python', 'diff_5.py', video1_path, video2_path, str(base_start_frame), str(alt_start_frame)])
 
 if __name__ == "__main__":
     main()

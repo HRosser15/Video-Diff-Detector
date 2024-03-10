@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+import sys
 
 # Global variables to store detected contours and their corresponding frame counts
 detected_contour_list = []
@@ -161,24 +162,35 @@ def main():
     global detected_contour_list
     global frame_count_list
 
-    # video1_path = '../../Videos/scenario_base.mp4'
-    # video2_path = '../../Videos/scenario_alt2.mp4'
-    video1_path = './Videos/Gauge_base.mp4'
-    video2_path = './Videos/Gauge_diff1.mp4'
-
-    cap1 = cv.VideoCapture(video1_path)
-    cap2 = cv.VideoCapture(video2_path)
-
-    if not (cap1.isOpened() and cap2.isOpened()):
-        print("Error: Unable to open videos.")
+    if len(sys.argv) < 5:
+        print("Usage: python diff_find.py video_path1 video_path2 base_start_frame alt_start_frame")
         return
     
+    video1_path = sys.argv[1]
+    video2_path = sys.argv[2]
+    base_start_frame = int(sys.argv[3])
+    alt_start_frame = int(sys.argv[4])
+
+    video_base_path = 'Videos/'
+    full_video1_path = video_base_path + video1_path
+    full_video2_path = video_base_path + video2_path
+
+    cap1 = cv.VideoCapture(full_video1_path)
+    cap2 = cv.VideoCapture(full_video2_path)
+
+    if not (cap1.isOpened() and cap2.isOpened()):
+        print("No more frames to read. Terminating Process")
+        return
+
     frame_rate = cap1.get(cv.CAP_PROP_FPS)
     duration_threshold_frames = int(frame_rate * 5)  # Set the duration threshold in frames
 
-    # Set starting frame for each video
-    cap1.set(cv.CAP_PROP_POS_FRAMES, 4)
-    cap2.set(cv.CAP_PROP_POS_FRAMES, 0)
+    # Set starting frame for each video (we will adjust this by passing in the 
+    # synchronization frames found in the video synchronizer)
+    cap1.set(cv.CAP_PROP_POS_FRAMES, base_start_frame)
+    cap2.set(cv.CAP_PROP_POS_FRAMES, alt_start_frame)
+    
+
 
     frame_count = 0
 
