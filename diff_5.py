@@ -12,7 +12,7 @@ def handle_key_events():
     key = cv.waitKey(1)
     if key == ord('p'):  # Pause execution
         print("Paused. Press 'l' to resume.")
-        while cv.waitKey(0) != ord('l'):  # Wait for 'l' to resume
+        while cv.waitKey(0) != ord('l'):  # Wait for 'L' to resume
             pass
 
 def process_contours(contours, frame_count):
@@ -34,7 +34,7 @@ def process_contours(contours, frame_count):
                 break
         if not found_match:
             duration = frame_count - frame_count_list[i]
-            if duration > 150:
+            if duration > 5:  # duration can be adjusted
                 print(f"Contour removed after {duration} frames")
 
     # Add new contours
@@ -54,6 +54,9 @@ def split_contours(larger_contour, smaller_contour):
     cv.drawContours(mask, [smaller_contour], 0, (255), thickness=cv.FILLED)
     new_half = cv.bitwise_and(larger_contour, larger_contour, mask=mask)
     orig_half = cv.subtract(larger_contour, new_half)
+    print("new half: ", new_half)
+    print("original half: ", orig_half)
+    
     return new_half, orig_half
 
 def remove_subset(original_contour, subset_contour):
@@ -78,7 +81,7 @@ def frame_difference(frame1, frame2, threshold=25):
     contours, _ = cv.findContours(thresholded_diff, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     
     # Filter out small contours
-    min_contour_area = 50  # Adjust this value based on your requirements
+    min_contour_area = 20  # Adjust this value based on your requirements
     contours = [contour for contour in contours if cv.contourArea(contour) > min_contour_area]
     return thresholded_diff, contours
 
@@ -103,8 +106,8 @@ def visualize_difference(frame1, frame2, diff_image, contours, diff_value, cap1)
     # Draw the combined rectangles on the frames
     for rect in combined_rects:
         x, y, w, h = rect
-        cv.rectangle(frame1_with_border, (x, y), (x + w, y + h), (255, 0, 0), 2)
-        cv.rectangle(frame2_with_border, (x, y), (x + w, y + h), (255, 0, 0), 2)
+        cv.rectangle(frame1_with_border, (x-10, y-10), (x + w + 10, y + h + 10), (255, 0, 0), 1)
+        cv.rectangle(frame2_with_border, (x-10, y-10), (x + w + 10, y + h + 10), (255, 0, 0), 1)
 
     # Add a border around each video frame
     frame1_with_border = cv.copyMakeBorder(frame1_with_border, 10, 50, 10, 10, cv.BORDER_CONSTANT, value=(255, 255, 255))
@@ -134,26 +137,28 @@ def combine_rectangles(rects):
         x1, y1, w1, h1 = rects[i]
         x2, y2 = x1 + w1, y1 + h1
 
-        j = i + 1
-        while j < len(rects):
-            xj, yj, wj, hj = rects[j]
+        merged = False
+        for j in range(len(combined_rects)):
+            xj, yj, wj, hj = combined_rects[j]
             xj2, yj2 = xj + wj, yj + hj
 
-            # Check if the rectangles overlap or touch
+            # Check if the rectangle overlaps with the existing combined rectangle
             if max(x1, xj) < min(x2, xj2) and max(y1, yj) < min(y2, yj2):
-                # Combine the rectangles
+                # Merge the rectangles
                 x1 = min(x1, xj)
                 y1 = min(y1, yj)
                 x2 = max(x2, xj2)
                 y2 = max(y2, yj2)
                 w1 = x2 - x1
                 h1 = y2 - y1
-                j += 1
-            else:
+                combined_rects[j] = (x1, y1, w1, h1)
+                merged = True
                 break
 
-        combined_rects.append((x1, y1, w1, h1))
-        i = j
+        if not merged:
+            combined_rects.append((x1, y1, w1, h1))
+
+        i += 1
 
     return combined_rects
 
@@ -161,10 +166,10 @@ def main():
     global detected_contour_list
     global frame_count_list
 
-    # video1_path = '../../Videos/scenario_base.mp4'
-    # video2_path = '../../Videos/scenario_alt2.mp4'
-    video1_path = './Videos/Gauge_base.mp4'
-    video2_path = './Videos/Gauge_diff1.mp4'
+    video1_path = './Videos/scenario_base.mp4'
+    video2_path = './Videos/scenario_alt2.mp4'
+    # video1_path = './Videos/Gauge_base.mp4'
+    # video2_path = './Videos/Gauge_diff1.mp4'
 
     cap1 = cv.VideoCapture(video1_path)
     cap2 = cv.VideoCapture(video2_path)
