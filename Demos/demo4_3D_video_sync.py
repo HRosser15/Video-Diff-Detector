@@ -1,11 +1,6 @@
 import cv2 as cv
 import numpy as np
 
-# TO RUN:
-# open terminal with "CTRL + `"
-# enter 'python demo2_pixelwise_video_sync.py' and press enter
-# press 'q' to exit the video window
-
 def find_frame_difference(frame1, frame2):
     # Convert frames to grayscale for simplicity
     gray1 = cv.cvtColor(frame1, cv.COLOR_BGR2GRAY)
@@ -115,8 +110,8 @@ def rescaleFrame(frame, scale):
 
 def main():
     # Open video capture for base and alternative videos
-    base_vid = cv.VideoCapture('../Videos/mochi1.mov')
-    alt_vid = cv.VideoCapture('../Videos/mochi2.mov')
+    base_vid = cv.VideoCapture('../Videos/3D_cat1.mov')
+    alt_vid = cv.VideoCapture('../Videos/3D_cat2.mov')
 
     # Get and set frame rates to match for synchronization
     base_frame_rate = base_vid.get(cv.CAP_PROP_FPS)

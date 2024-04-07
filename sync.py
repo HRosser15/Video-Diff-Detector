@@ -163,8 +163,7 @@ def main():
     # find the minimum frame number
     min_frame_number = min(sync_frame_number, alt_sync_frame_number)
 
-    # Print frame numbers for reference
-    # print("Minumum frame number: ", min_frame_number)
+        # Print frame numbers for reference
     # print("Starting base video from frame number: ", sync_frame_number - min_frame_number)
     # print("Starting alt video from frame number: ", alt_sync_frame_number - min_frame_number)
     base_start_frame = sync_frame_number - min_frame_number

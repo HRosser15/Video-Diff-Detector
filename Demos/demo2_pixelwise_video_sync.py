@@ -130,8 +130,8 @@ def rescaleFrame(frame, scale):
 
 def main():
     # Open video capture for base and alternative videos
-    base_vid = cv.VideoCapture('../Videos/scenario_base.mp4')
-    alt_vid = cv.VideoCapture('../Videos/scenario_alt2.mp4')
+    base_vid = cv.VideoCapture('../Videos/Gauge_base.mp4')
+    alt_vid = cv.VideoCapture('../Videos/Gauge_diff1.mp4')
 
     # Get and set frame rates to match for synchronization
     base_frame_rate = base_vid.get(cv.CAP_PROP_FPS)
