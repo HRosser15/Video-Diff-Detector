@@ -47,8 +47,6 @@ Git:
   `git --version`
 - If you don't have it or don't have the most recent version, download and install from the offical Git website: https://git-scm.com/downloads
 
-VSCode Python Extension:
-
 - In VSCode, click the extensions button on the left, search for `Python`, and install it.
 
 Potentially More TBD:
