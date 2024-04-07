@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 import tkinter as tk
+import sys
 
 # Global variables to store detected contours and their corresponding frame counts
 detected_contour_list = []
@@ -20,7 +21,7 @@ def rescaleFrame(frame, scale):
 
     return cv.resize(frame, dimensions, interpolation=cv.INTER_AREA)
 
-MARGIN = 10  # Adjust this value to change the margin
+MARGIN = 5  # Adjust this value to change the margin of the bounding box
 
 def handle_key_events(key, paused):
     if key == ord('q'):
@@ -53,8 +54,9 @@ def process_contours(contours, frame_count, total_frame_count):
         if not found_match:
             duration = frame_count - frame_count_list[i]
             if duration > 30:  # duration can be adjusted
-                print(f"Difference found at {(total_frame_count - duration)/30} seconds")
-                print(f"Difference present for {duration/30} seconds\n")
+                print(f"Difference found at {((total_frame_count - duration)/30):.2f} seconds")
+                print(f"Difference present for {(duration/30):.2f} seconds\n")
+
 
     # Add new contours
     for cnt in contours:
@@ -100,7 +102,7 @@ def frame_difference(frame1, frame2, threshold=25):
     contours, _ = cv.findContours(thresholded_diff, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     
     # Filter out small contours
-    min_contour_area = 20  # Adjust this value based on your requirements
+    min_contour_area = 20  # Adjust this value based how strict you need the filtering to be. higher number = more contours are required for a difference to be counted.
     contours = [contour for contour in contours if cv.contourArea(contour) > min_contour_area]
     return thresholded_diff, contours
 
@@ -108,7 +110,7 @@ def visualize_difference(frame1, frame2, diff_image, contours, cap1, fps, frame_
     # Copy frames to avoid modifying the original frames
     frame1_with_border = frame1.copy()
     frame2_with_border = frame2.copy()
-    print("frame1_without_border size:", frame1_with_border.shape)
+    # print("frame1_without_border size:", frame1_with_border.shape)
 
     # Draw rectangles around all detected contours
     bounding_rects = []
@@ -129,31 +131,27 @@ def visualize_difference(frame1, frame2, diff_image, contours, cap1, fps, frame_
     frame1_with_border = cv.copyMakeBorder(frame1_with_border, border_size, bottom_border_size, border_size, border_size, cv.BORDER_CONSTANT, value=(255, 255, 255))
     frame2_with_border = cv.copyMakeBorder(frame2_with_border, border_size, bottom_border_size, border_size, border_size, cv.BORDER_CONSTANT, value=(255, 255, 255))
 
-    # Print the size of frame1_with_border
-    print("frame1_with_border size:", frame1_with_border.shape)
+    # # Print the size of frame1_with_border
+    # print("frame1_with_border size:", frame1_with_border.shape)
 
-    # Print border size and bottom border size
-    print("Border Size:", border_size)
-    print("Bottom Border Size:", bottom_border_size)
+    # # Print border size and bottom border size
+    # print("Border Size:", border_size)
+    # print("Bottom Border Size:", bottom_border_size)
 
-    # Calculate the text size based on the frame dimensions
-    # font_scale = max(1, int(frame_width / 500))
-    # thickness = max(1, int(frame_width / 1000))
+    # # Print dimensions of the output video
+    # print("Output Video Dimensions:", output_width, "x", output_height)
 
-    # Print dimensions of the output video
-    print("Output Video Dimensions:", output_width, "x", output_height)
+    # # Print dimensions of the displayed window
+    # window_width = frame1_with_border.shape[1] + frame2_with_border.shape[1]
+    # window_height = max(frame1_with_border.shape[0], frame2_with_border.shape[0])
+    # print("Displayed Window Dimensions:", window_width, "x", window_height)
 
-    # Print dimensions of the displayed window
-    window_width = frame1_with_border.shape[1] + frame2_with_border.shape[1]
-    window_height = max(frame1_with_border.shape[0], frame2_with_border.shape[0])
-    print("Displayed Window Dimensions:", window_width, "x", window_height)
-
-    # Print placement of the text
-    print("Text Position (X, Y):", text_x_pos, ",", text_y_pos)
+    # # Print placement of the text
+    # print("Text Position (X, Y):", text_x_pos, ",", text_y_pos)
 
     # Print height of the text
     text_height = cv.getTextSize("Video", cv.FONT_HERSHEY_SIMPLEX, text_size, text_weight)[0][1]
-    print("Text Height:", text_height)
+    # print("Text Height:", text_height)
 
     cv.putText(frame1_with_border, "Video 1", (text_x_pos, text_y_pos), cv.FONT_HERSHEY_SIMPLEX, text_size, (0, 0, 0), text_weight, cv.LINE_AA)
     cv.putText(frame2_with_border, "Video 2", (text_x_pos, text_y_pos), cv.FONT_HERSHEY_SIMPLEX, text_size, (0, 0, 0), text_weight, cv.LINE_AA)
@@ -163,7 +161,7 @@ def visualize_difference(frame1, frame2, diff_image, contours, cap1, fps, frame_
 
     cv.imshow('Difference Detection', concatenated_frame)
 
-    print("=============================================================")
+    # print("=============================================================")
 
     return concatenated_frame
 
@@ -211,12 +209,12 @@ def set_display_properties(cap1):
     # Adjust frame size to better fit current user's screen
     screen_div_by_three = screen_width / 4
     frame_scale = screen_div_by_three / frame_width
-    print(" FRAME SCALE: ", frame_scale)
+    # print(" FRAME SCALE: ", frame_scale)
 
     # Define border sizes and output video properties
     border_size = int(frame_width/30)
     output_width = int((frame_width + (border_size * 2)) * 2 * frame_scale)
-    print("OUTPUT WIDTH: ", output_width)
+    # print("OUTPUT WIDTH: ", output_width)
 
     text_size = 1
     text_weight = 1
@@ -250,7 +248,7 @@ def set_display_properties(cap1):
     # print("Output width: ", output_width)
     # print("Output height: ", output_height)
     # print("Text width: ", text_width)
-    print("Text height inside set_display_properties: ", text_height)
+    # print("Text height inside set_display_properties: ", text_height)
     
 
     # Define coordinates and properties for text placement
@@ -258,19 +256,19 @@ def set_display_properties(cap1):
     text_x_offset = int(text_width / 2)
     text_x_pos = int((video_width / 2 - text_x_offset))
     text_y_pos = int(frame_height + border_size + text_height + (frame_height / 30)) 
-    print(f"text_y_pos = {frame_height} + {border_size} + {text_height} + 10)")
-    print(f"text y pos with no int = {frame_height + border_size + text_height + 10}")
-    print(f"text y pos with int = {int(frame_height + border_size + text_height + 10)}")
+    # print(f"text_y_pos = {frame_height} + {border_size} + {text_height} + 10)")
+    # print(f"text y pos with no int = {frame_height + border_size + text_height + 10}")
+    # print(f"text y pos with int = {int(frame_height + border_size + text_height + 10)}")
 
-    print("text_x_pos = int((video_width / 2 - text_x_offset))")
-    print(f"Text x position: {text_x_pos} = ({video_width} / 2 - {text_x_offset})")  
+    # print("text_x_pos = int((video_width / 2 - text_x_offset))")
+    # print(f"Text x position: {text_x_pos} = ({video_width} / 2 - {text_x_offset})")  
 
-    print("Frame width: ", frame_width)
-    print("Frame height: ", frame_height)
-    print("Border size: ", border_size)
+    # print("Frame width: ", frame_width)
+    # print("Frame height: ", frame_height)
+    # print("Border size: ", border_size)
     
-    print("Text x position: ", text_x_pos)
-    print("Text y position: ", text_y_pos)
+    # print("Text x position: ", text_x_pos)
+    # print("Text y position: ", text_y_pos)
 
     return fps, frame_scale, border_size, bottom_border_size, text_x_pos, text_y_pos, text_size, text_weight, output_width, output_height, frame_width, frame_height 
 
@@ -280,17 +278,36 @@ def write_output_video(frame, output_video):
 
 
 def main():
+    if len(sys.argv) < 5:
+        print("Usage: python diff.py video1_file_name.ext video2_file_name.ext base_start_frame alt_start_frame")
+        print(" ** temp dev use: base_start_frame and alt_start_frame are passed in from sync.py")
+        print(" ** temp dev use: application will add the path to the Videos folder by default. Please just add the file name and extension.")
+        return
+    
+    print("============================================")
+    print("||    Starting difference detection...    ||")
+    print("||     Press 'q' to quit the program.     ||")
+    print("||  Press 'p' to pause/resume the video.  ||")
+    print("============================================")
+    
     global detected_contour_list
     global frame_count_list
     total_frame_count = 0
 
-    video1_path = './Videos/scenario_base.mp4'
-    video2_path = './Videos/scenario_alt1.mp4'
-    # video1_path = './Videos/Gauge_base.mp4'
-    # video2_path = './Videos/Gauge_diff1.mp4'
+    video1_path = sys.argv[1]
+    video2_path = sys.argv[2]
+    base_start_frame = int(sys.argv[3])
+    alt_start_frame = int(sys.argv[4])
 
-    cap1 = cv.VideoCapture(video1_path)
-    cap2 = cv.VideoCapture(video2_path)
+
+    video_base_path = 'Videos/'
+    full_video1_path = video_base_path + video1_path
+    full_video2_path = video_base_path + video2_path
+
+    
+    # Open video capture for base and alternative videos
+    cap1 = cv.VideoCapture(full_video1_path)
+    cap2 = cv.VideoCapture(full_video2_path)
 
     if not (cap1.isOpened() and cap2.isOpened()):
         print("Error: Unable to open videos.")
@@ -302,14 +319,14 @@ def main():
     fps, frame_scale, border_size, bottom_border_size, text_x_pos, text_y_pos, text_size, text_weight, output_width, output_height, frame_width, frame_height = set_display_properties(cap1)
 
     # Set starting frame for each video
-    cap1.set(cv.CAP_PROP_POS_FRAMES, 4)
-    cap2.set(cv.CAP_PROP_POS_FRAMES, 0)
+    cap1.set(cv.CAP_PROP_POS_FRAMES, base_start_frame)
+    cap2.set(cv.CAP_PROP_POS_FRAMES, alt_start_frame)
 
     frame_count = 0
     paused = False
 
     codec = cv.VideoWriter_fourcc(*'mp4v')
-    output_video = cv.VideoWriter('Videos/Differences.mp4', codec, fps, (output_width, output_height), True)
+    output_video = cv.VideoWriter('Output_Videos/Differences.mp4', codec, fps, (output_width, output_height), True)
 
     while True:
         if not paused:
