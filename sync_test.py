@@ -1,10 +1,7 @@
-from operator import call
-import sys
 import unittest
 import cv2 as cv
 import numpy as np
 from unittest import mock
-from unittest.mock import Mock, patch
 
 from sync import find_frame_difference, find_matching_frame, find_sync_frame_number, get_frame_at_number, find_matching_frame_number, main
 
