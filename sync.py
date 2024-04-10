@@ -33,7 +33,7 @@ def find_matching_frame(gray1, frame2):
     non_zero_count = np.count_nonzero(thresholded_diff)
 
     # Return true if less than "threshold" non-black pixels are found
-    threshold = 20
+    threshold = 50
     return non_zero_count < threshold
 
 def find_sync_frame_number(first_frame, base_vid):
@@ -133,10 +133,11 @@ def main():
     # Find the frame number in the alt video that contains the sync frame
     alt_sync_frame_number = find_matching_frame_number(sync_frame, alt_vid)
     # print("Alt video reference frame found at frame number: ", alt_sync_frame_number)
+    
 
     # If no alt_sync_frame_number is found, switch the video paths and try again
     if alt_sync_frame_number is None:
-        print("No alt sync frame found, switching video paths...")
+        # print("No alt sync frame found, switching video paths...")
         base_vid.release()
         alt_vid.release()
         video1_path, video2_path = video2_path, video1_path
@@ -157,17 +158,22 @@ def main():
 
     # If still no alt_sync frame is found, return None
     if alt_sync_frame_number is None:
-        print("Videos could not be synced. No matching frame was found.")
+        # print("Videos could not be synced. No matching frame was found.")
         return None, None, None
 
     # find the minimum frame number
     min_frame_number = min(sync_frame_number, alt_sync_frame_number)
 
-        # Print frame numbers for reference
+    # Print frame numbers for reference
+    # print("Minumum frame number: ", min_frame_number)
     # print("Starting base video from frame number: ", sync_frame_number - min_frame_number)
     # print("Starting alt video from frame number: ", alt_sync_frame_number - min_frame_number)
-    base_start_frame = sync_frame_number - min_frame_number
-    alt_start_frame = alt_sync_frame_number - min_frame_number
+    if videos_switched:
+        alt_start_frame = sync_frame_number - min_frame_number
+        base_start_frame = alt_sync_frame_number - min_frame_number
+    else:
+        base_start_frame = sync_frame_number - min_frame_number
+        alt_start_frame = alt_sync_frame_number - min_frame_number
 
     # Set starting frame numbers for both videos
     base_vid.set(cv.CAP_PROP_POS_FRAMES, base_start_frame)

@@ -75,8 +75,8 @@ def split_contours(larger_contour, smaller_contour):
     cv.drawContours(mask, [smaller_contour], 0, (255), thickness=cv.FILLED)
     new_half = cv.bitwise_and(larger_contour, larger_contour, mask=mask)
     orig_half = cv.subtract(larger_contour, new_half)
-    print("new half: ", new_half)
-    print("original half: ", orig_half)
+    # print("new half: ", new_half)
+    # print("original half: ", orig_half)
     
     return new_half, orig_half
 
@@ -87,7 +87,7 @@ def remove_subset(original_contour, subset_contour):
     new_contour_half = cv.subtract(original_contour, mask)
     return new_contour_half
 
-def frame_difference(frame1, frame2, threshold=25):
+def frame_difference(frame1, frame2, threshold=20):
     # Convert frames to grayscale for simplicity
     gray1 = cv.cvtColor(frame1, cv.COLOR_BGR2GRAY)
     gray2 = cv.cvtColor(frame2, cv.COLOR_BGR2GRAY)
@@ -150,7 +150,7 @@ def visualize_difference(frame1, frame2, diff_image, contours, cap1, fps, frame_
     # print("Text Position (X, Y):", text_x_pos, ",", text_y_pos)
 
     # Print height of the text
-    text_height = cv.getTextSize("Video", cv.FONT_HERSHEY_SIMPLEX, text_size, text_weight)[0][1]
+    # text_height = cv.getTextSize("Video", cv.FONT_HERSHEY_SIMPLEX, text_size, text_weight)[0][1]
     # print("Text Height:", text_height)
 
     cv.putText(frame1_with_border, "Video 1", (text_x_pos, text_y_pos), cv.FONT_HERSHEY_SIMPLEX, text_size, (0, 0, 0), text_weight, cv.LINE_AA)
@@ -200,7 +200,7 @@ def combine_rectangles(rects):
 
 def set_display_properties(cap1):
     screen_width, screen_height = get_screen_resolution()
-    print("Screen resolution: {}x{}".format(screen_width, screen_height))
+    # print("Screen resolution: {}x{}".format(screen_width, screen_height))
 
     frame_width = int(cap1.get(cv.CAP_PROP_FRAME_WIDTH))
     frame_height = int(cap1.get(cv.CAP_PROP_FRAME_HEIGHT))
@@ -279,6 +279,7 @@ def write_output_video(frame, output_video):
 
 def main():
     if len(sys.argv) < 5:
+        print("Error: Incorrect number of arguments.")
         print("Usage: python diff.py video1_file_name.ext video2_file_name.ext base_start_frame alt_start_frame")
         print(" ** temp dev use: base_start_frame and alt_start_frame are passed in from sync.py")
         print(" ** temp dev use: application will add the path to the Videos folder by default. Please just add the file name and extension.")
