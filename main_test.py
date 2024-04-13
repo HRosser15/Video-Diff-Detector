@@ -3,7 +3,7 @@ from unittest.mock import patch
 import sys
 import subprocess
 
-class TestVideoSync(unittest.TestCase):
+class TestMain(unittest.TestCase):
 
     # test successful sync
     @patch('subprocess.check_output')
