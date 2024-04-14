@@ -1,8 +1,9 @@
 import cv2 as cv
 import numpy as np
 import sys
+import argparse
 
-def find_frame_difference(gray1, frame2):
+def find_frame_difference(gray1, frame2, threshold):
     # Convert frames to grayscale for simplicity
     gray2 = cv.cvtColor(frame2, cv.COLOR_BGR2GRAY)  
 
@@ -10,16 +11,15 @@ def find_frame_difference(gray1, frame2):
     diff = cv.absdiff(gray1, gray2)
 
     # Create a binary image, setting pixels above a threshold to white and below to black
-    _, thresholded_diff = cv.threshold(diff, 50, 255, cv.THRESH_BINARY)
+    _, thresholded_diff = cv.threshold(diff, threshold, 255, cv.THRESH_BINARY)
 
     # Count the number of non-black pixels in the thresholded_diff
     non_zero_count = np.count_nonzero(thresholded_diff)
 
     # Return true if more than "threshold" non-black pixels are found
-    threshold = 50
-    return non_zero_count > threshold
+    return non_zero_count > 0
 
-def find_matching_frame(gray1, frame2):
+def find_matching_frame(gray1, frame2, threshold):
     # Convert frames to grayscale for simplicity
     gray2 = cv.cvtColor(frame2, cv.COLOR_BGR2GRAY)  
 
@@ -27,16 +27,15 @@ def find_matching_frame(gray1, frame2):
     diff = cv.absdiff(gray1, gray2)
 
     # Create a binary image, setting pixels above a threshold to white and below to black
-    _, thresholded_diff = cv.threshold(diff, 10, 255, cv.THRESH_BINARY)
+    _, thresholded_diff = cv.threshold(diff, threshold, 255, cv.THRESH_BINARY)
 
     # Count the number of non-black pixels in the thresholded_diff
     non_zero_count = np.count_nonzero(thresholded_diff)
 
     # Return true if less than "threshold" non-black pixels are found
-    threshold = 20
     return non_zero_count < threshold
 
-def find_sync_frame_number(first_frame, base_vid):
+def find_sync_frame_number(first_frame, base_vid, threshold):
     # Reset video capture to the beginning
     base_vid.set(cv.CAP_PROP_POS_FRAMES, 0)
 
@@ -53,7 +52,7 @@ def find_sync_frame_number(first_frame, base_vid):
         frame_number += 1
 
         # If a non-matching frame is found, return the current frame number
-        if find_frame_difference(first_frame, frame):
+        if find_frame_difference(first_frame, frame, threshold):
             return frame_number
 
     return None
@@ -71,7 +70,7 @@ def get_frame_at_number(frame_number, vid):
     else:
         return None
 
-def find_matching_frame_number(sync_frame, alt_vid):
+def find_matching_frame_number(sync_frame, alt_vid, threshold):
     frame_number = 0
 
     while True:
@@ -85,32 +84,43 @@ def find_matching_frame_number(sync_frame, alt_vid):
         frame_number += 1
 
         # Return the frame number if a matching frame is found
-        if find_matching_frame(sync_frame, frame):
+        if find_matching_frame(sync_frame, frame, threshold):
             return frame_number
 
     return None
 
 def main():
-    if len(sys.argv) < 3:
-        print("Usage: python video_sync.py <video1_path> <video2_path>")
-        return
-    
-    # Set resolution of the video
-    width, height = 1920, 1080
+    parser = argparse.ArgumentParser(description='Video Synchronization')
+    parser.add_argument('video1_path', help='Path to the first video file')
+    parser.add_argument('video2_path', help='Path to the second video file')
+    parser.add_argument('-t', '--threshold', type=int, default=25, help='Set the threshold value for pixel-wise difference calculation (default: 25).')
+    parser.add_argument('-c', '--contour-area', type=int, default=20, help='Set the minimum contour area threshold for contour filtering (default: 20).')
+    args = parser.parse_args()
 
-    base_vido_path = 'Videos/'
-    video1_path = sys.argv[1]
-    video2_path = sys.argv[2]
-    
+    video1_path = args.video1_path
+    video2_path = args.video2_path
+    threshold = args.threshold
+    contour_area = args.contour_area
+
+    width, height = 1920, 1080  # Set default resolution
+
+    base_video_path = 'Videos/'
+    full_video1_path = base_video_path + video1_path
+    full_video2_path = base_video_path + video2_path
+
     # Open video capture for base and alternative videos
-    base_vid = cv.VideoCapture(base_vido_path + video1_path)
-    alt_vid = cv.VideoCapture(base_vido_path + video2_path)
+    base_vid = cv.VideoCapture(full_video1_path)
+    alt_vid = cv.VideoCapture(full_video2_path)
+
+    if not (base_vid.isOpened() and alt_vid.isOpened()):
+        print("Error: Unable to open videos.")
+        return
 
     # Get and set frame rates to match for synchronization
     base_frame_rate = base_vid.get(cv.CAP_PROP_FPS)
     alt_vid.set(cv.CAP_PROP_FPS, base_frame_rate)
 
-    # Set resolution of the video
+    # Set resolution of the videos
     base_vid.set(cv.CAP_PROP_FRAME_WIDTH, width)
     base_vid.set(cv.CAP_PROP_FRAME_HEIGHT, height)
 
@@ -119,20 +129,18 @@ def main():
 
     # Convert it to grayscale for simplicity
     first_frame = cv.cvtColor(first_frame, cv.COLOR_BGR2GRAY)  
-    
+
     # Find frame numbers where videos are synchronized
-    sync_frame_number = find_sync_frame_number(first_frame, base_vid)
+    sync_frame_number = find_sync_frame_number(first_frame, base_vid, threshold)
 
     # Get the frame at the sync_frame_number
     sync_frame = get_frame_at_number(sync_frame_number, base_vid)
-    # print("Base video reference frame found at frame number: ", sync_frame_number)
 
     # Convert it to grayscale for simplicity
     sync_frame = cv.cvtColor(sync_frame, cv.COLOR_BGR2GRAY)
     
     # Find the frame number in the alt video that contains the sync frame
-    alt_sync_frame_number = find_matching_frame_number(sync_frame, alt_vid)
-    # print("Alt video reference frame found at frame number: ", alt_sync_frame_number)
+    alt_sync_frame_number = find_matching_frame_number(sync_frame, alt_vid, contour_area)
 
     # If no alt_sync_frame_number is found, switch the video paths and try again
     if alt_sync_frame_number is None:
@@ -140,17 +148,17 @@ def main():
         base_vid.release()
         alt_vid.release()
         video1_path, video2_path = video2_path, video1_path
-        base_vid = cv.VideoCapture(base_vido_path + video1_path)
-        alt_vid = cv.VideoCapture(base_vido_path + video2_path)
+        base_vid = cv.VideoCapture(base_video_path + video1_path)
+        alt_vid = cv.VideoCapture(base_video_path + video2_path)
         base_vid.set(cv.CAP_PROP_FPS, base_frame_rate)
         base_vid.set(cv.CAP_PROP_FRAME_WIDTH, width)
         base_vid.set(cv.CAP_PROP_FRAME_HEIGHT, height)
         ret, first_frame = base_vid.read()
         first_frame = cv.cvtColor(first_frame, cv.COLOR_BGR2GRAY)
-        sync_frame_number = find_sync_frame_number(first_frame, base_vid)
+        sync_frame_number = find_sync_frame_number(first_frame, base_vid, threshold)
         sync_frame = get_frame_at_number(sync_frame_number, base_vid)
         sync_frame = cv.cvtColor(sync_frame, cv.COLOR_BGR2GRAY)
-        alt_sync_frame_number = find_matching_frame_number(sync_frame, alt_vid)
+        alt_sync_frame_number = find_matching_frame_number(sync_frame, alt_vid, contour_area)
         videos_switched = True
     else:
         videos_switched = False
@@ -163,9 +171,6 @@ def main():
     # find the minimum frame number
     min_frame_number = min(sync_frame_number, alt_sync_frame_number)
 
-        # Print frame numbers for reference
-    # print("Starting base video from frame number: ", sync_frame_number - min_frame_number)
-    # print("Starting alt video from frame number: ", alt_sync_frame_number - min_frame_number)
     base_start_frame = sync_frame_number - min_frame_number
     alt_start_frame = alt_sync_frame_number - min_frame_number
 
