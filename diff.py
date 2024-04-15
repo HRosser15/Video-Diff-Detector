@@ -121,6 +121,7 @@ def rescaleFrame(frame, scale):
 
 def handle_key_events(key, paused):
     if key == ord('q'):
+        print("Quitting the program...")
         return True, paused  # Quit the program
     elif key == ord('p'):
         paused = not paused  # Toggle pause/resume
@@ -359,13 +360,13 @@ def set_display_properties(cap1, resolution, min_contour_area, threshold):
 
     if min_contour_area is None:
         if frame_width < 360:
-            min_contour_area = 75
+            min_contour_area = 60
         elif frame_width < 720:
-            min_contour_area = 150
+            min_contour_area = 120
         elif frame_width < 1080:
             min_contour_area = 200
         else:
-            min_contour_area = 300
+            min_contour_area = 250
         print("Setting minimum contour area to: ", min_contour_area)
     else:
         print("Minimum contour area manually set to: ", min_contour_area)
@@ -374,14 +375,14 @@ def set_display_properties(cap1, resolution, min_contour_area, threshold):
         if frame_width < 360:
             threshold = 15
         elif frame_width < 720:
-            threshold = 30
+            threshold = 25
         elif frame_width < 1080:
-            threshold = 50
+            threshold = 35
         else:
-            threshold = 80
+            threshold = 50
         print("Setting threshold to: ", threshold)
     else:
-        print("Threshold manually set to: ", min_contour_area)
+        print("Threshold manually set to: ", threshold)
 
     if WEIGHT is None:
         if frame_width < 360:
@@ -395,7 +396,7 @@ def set_display_properties(cap1, resolution, min_contour_area, threshold):
         print("Setting bounding box weight to: ", weight)
     else:
         weight = WEIGHT
-        print("Bounding box weight manually set to: ", min_contour_area)
+        print("Bounding box weight manually set to: ", weight)
 
     if MARGIN is None:
         if frame_width < 360:
@@ -409,7 +410,7 @@ def set_display_properties(cap1, resolution, min_contour_area, threshold):
         print("Setting bounding box margin to: ", margin)
     else:
         margin = MARGIN
-        print("Bounding box margin manually set to: ", min_contour_area)
+        print("Bounding box margin manually set to: ", margin)
 
     text_dimensions = cv.getTextSize("Video", cv.FONT_HERSHEY_TRIPLEX, text_size, text_weight)
     text_height = cv.getTextSize("Video", cv.FONT_HERSHEY_TRIPLEX, text_size, text_weight)[0][1]
@@ -567,6 +568,7 @@ def main():
             ret2, frame2 = cap2.read()
 
             if not (ret1 and ret2):
+                print("End of video reached.")
                 break
 
             # Perform pixel-wise difference and get contours
@@ -602,7 +604,7 @@ def main():
 
     save_remaining_differences(detected_contour_list, frame_count_list, total_frame_count, fps, duration_threshold, logger, difference_images_folder, last_frame1,  last_frame2, frame_scale, border_size, bottom_border_size, text_x_pos, text_y_pos, text_size, text_weight)
 
-    print("End of video reached. Process terminated.")
+    print("Process terminated.")
 
     
     cap1.release()
