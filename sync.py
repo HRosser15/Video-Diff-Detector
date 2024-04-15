@@ -89,20 +89,50 @@ def find_matching_frame_number(sync_frame, alt_vid, threshold):
 
     return None
 
+def set_sync_properties(base_vid, threshold, contour_area):
+    frame_width = int(base_vid.get(cv.CAP_PROP_FRAME_WIDTH))
+    frame_height = int(base_vid.get(cv.CAP_PROP_FRAME_HEIGHT))
+
+    if threshold is None:
+        if frame_width < 360:
+            threshold = 60
+        elif frame_width < 720:
+            threshold = 80
+        elif frame_width < 1080:
+            threshold = 120
+        else:
+            threshold = 150
+    #     print("Setting sync threshold to: ", threshold)
+    # else:
+    #     print("Sync threshold manually set to: ", threshold)
+
+    if contour_area is None:
+        if frame_width < 360:
+            contour_area = 20
+        elif frame_width < 720:
+            contour_area = 35
+        elif frame_width < 1080:
+            contour_area = 50
+        else:
+            contour_area = 80
+    #     print("Setting Sync contour area to: ", contour_area)
+    # else:
+    #     print("Sync contour area manually set to: ", contour_area)
+
+    return threshold, contour_area
+
 def main():
     parser = argparse.ArgumentParser(description='Video Synchronization')
     parser.add_argument('video1_path', help='Path to the first video file')
     parser.add_argument('video2_path', help='Path to the second video file')
-    parser.add_argument('-t', '--threshold', type=int, default=25, help='Set the threshold value for pixel-wise difference calculation (default: 25).')
-    parser.add_argument('-c', '--contour-area', type=int, default=20, help='Set the minimum contour area threshold for contour filtering (default: 20).')
+    parser.add_argument('-t', '--threshold', type=int, help='Set the threshold value for pixel-wise difference calculation (default: based on video resolution).')
+    parser.add_argument('-c', '--contour-area', type=int, help='Set the minimum contour area threshold for contour filtering (default: based on video resolution).')
     args = parser.parse_args()
 
     video1_path = args.video1_path
     video2_path = args.video2_path
     threshold = args.threshold
     contour_area = args.contour_area
-
-    width, height = 1920, 1080  # Set default resolution
 
     base_video_path = 'Videos/'
     full_video1_path = base_video_path + video1_path
@@ -120,9 +150,8 @@ def main():
     base_frame_rate = base_vid.get(cv.CAP_PROP_FPS)
     alt_vid.set(cv.CAP_PROP_FPS, base_frame_rate)
 
-    # Set resolution of the videos
-    base_vid.set(cv.CAP_PROP_FRAME_WIDTH, width)
-    base_vid.set(cv.CAP_PROP_FRAME_HEIGHT, height)
+    # Set sync properties based on video resolution or user input
+    threshold, contour_area = set_sync_properties(base_vid, threshold, contour_area)
 
     # Capture the first frame of the base video
     ret, first_frame = base_vid.read()
@@ -151,8 +180,6 @@ def main():
         base_vid = cv.VideoCapture(base_video_path + video1_path)
         alt_vid = cv.VideoCapture(base_video_path + video2_path)
         base_vid.set(cv.CAP_PROP_FPS, base_frame_rate)
-        base_vid.set(cv.CAP_PROP_FRAME_WIDTH, width)
-        base_vid.set(cv.CAP_PROP_FRAME_HEIGHT, height)
         ret, first_frame = base_vid.read()
         first_frame = cv.cvtColor(first_frame, cv.COLOR_BGR2GRAY)
         sync_frame_number = find_sync_frame_number(first_frame, base_vid, threshold)
