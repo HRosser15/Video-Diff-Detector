@@ -92,7 +92,7 @@ def create_folder_structure(log_directory=None, video1_path=None):
     return current_datetime_folder, difference_images_folder
 
 # When video ends, save the remaining differences if they meet the duration threshold.
-def save_remaining_differences(detected_contour_list, frame_count_list, total_frame_count, fps, duration_threshold, logger, difference_images_folder, last_frame1, last_frame2, frame_scale, border_size, bottom_border_size, text_x_pos, text_y_pos, text_size, text_weight):
+def save_remaining_differences(detected_contour_list, frame_count_list, total_frame_count, fps, duration_threshold, logger, difference_images_folder, last_frame1, last_frame2, border_size, bottom_border_size, text_x_pos, text_y_pos, text_size, text_weight, output_width, output_height):
     existing_filenames = {}
     for i, detected_contour in enumerate(detected_contour_list):
         duration = total_frame_count - frame_count_list[i]
@@ -118,7 +118,7 @@ def save_remaining_differences(detected_contour_list, frame_count_list, total_fr
 
             # Concatenate the frames and rescale the image
             concatenated_frame = np.concatenate((frame1_with_border, frame2_with_border), axis=1)
-            concatenated_frame = rescaleFrame(concatenated_frame, frame_scale)
+            concatenated_frame = rescaleFrame(concatenated_frame, (output_width, output_height))
 
             # Generate a unique filename based on timestamp, duration, and an incrementing digit if necessary
             base_filename = f"difference_{timestamp:.2f}_{duration_seconds:.2f}"
@@ -138,12 +138,9 @@ def get_screen_resolution():
     root.destroy()
     return screen_width, screen_height
 
-def rescaleFrame(frame, scale):
-    width = int(frame.shape[1] * scale)
-    height = int(frame.shape[0] * scale)
-    dimensions = (width, height)
-
-    return cv.resize(frame, dimensions, interpolation=cv.INTER_AREA)
+def rescaleFrame(frame, dimensions):
+    width, height = dimensions
+    return cv.resize(frame, (width, height), interpolation=cv.INTER_AREA)
 
 
 
@@ -159,7 +156,7 @@ def handle_key_events(key, paused):
             print("Resuming...")
     return False, paused
 
-def process_contours(contours, frame_count, total_frame_count, fps, duration_threshold, logger, difference_images_folder, frame1, frame2, frame_scale, border_size, bottom_border_size, text_x_pos, text_y_pos, text_size, text_weight):
+def process_contours(contours, frame_count, total_frame_count, fps, duration_threshold, logger, difference_images_folder, frame1, frame2, frame_scale, border_size, bottom_border_size, text_x_pos, text_y_pos, text_size, text_weight, output_width, output_height):
     global detected_contour_list
     global frame_count_list
     global previous_frame1
@@ -175,7 +172,7 @@ def process_contours(contours, frame_count, total_frame_count, fps, duration_thr
         contour_area = cv.contourArea(detected_contour)
         found_match = False
         for cnt in contours:
-            if abs(cv.contourArea(cnt) - contour_area) < 1:  # Threshold here can be adjusted
+            if abs(cv.contourArea(cnt) - contour_area) < 1: 
                 new_detected_contour_list.append(cnt)
                 new_frame_count_list.append(frame_count_list[i])
                 found_match = True
@@ -201,7 +198,7 @@ def process_contours(contours, frame_count, total_frame_count, fps, duration_thr
                 cv.putText(frame2_with_border, "Video 2", (text_x_pos, text_y_pos), cv.FONT_HERSHEY_SIMPLEX, text_size, (0, 0, 0), text_weight, cv.LINE_AA)
 
                 concatenated_frame = np.concatenate((frame1_with_border, frame2_with_border), axis=1)
-                concatenated_frame = rescaleFrame(concatenated_frame, frame_scale)
+                concatenated_frame = rescaleFrame(concatenated_frame, (output_width, output_height))
 
                 # Generate a unique filename based on timestamp, duration, and an incrementing digit if necessary
                 base_filename = f"difference_{timestamp:.2f}_{duration_seconds:.2f}"
@@ -267,7 +264,6 @@ def visualize_difference(frame1, frame2, diff_image, contours, cap1, fps, frame_
     # Copy frames to avoid modifying the original frames
     frame1_with_border = frame1.copy()
     frame2_with_border = frame2.copy()
-    # print("frame1_without_border size:", frame1_with_border.shape)
 
     # Draw rectangles around all detected contours
     bounding_rects = []
@@ -288,37 +284,16 @@ def visualize_difference(frame1, frame2, diff_image, contours, cap1, fps, frame_
     frame1_with_border = cv.copyMakeBorder(frame1_with_border, border_size, bottom_border_size, border_size, border_size, cv.BORDER_CONSTANT, value=(255, 255, 255))
     frame2_with_border = cv.copyMakeBorder(frame2_with_border, border_size, bottom_border_size, border_size, border_size, cv.BORDER_CONSTANT, value=(255, 255, 255))
 
-    # # Print the size of frame1_with_border
-    # print("frame1_with_border size:", frame1_with_border.shape)
-
-    # # Print border size and bottom border size
-    # print("Border Size:", border_size)
-    # print("Bottom Border Size:", bottom_border_size)
-
-    # # Print dimensions of the output video
-    # print("Output Video Dimensions:", output_width, "x", output_height)
-
-    # # Print dimensions of the displayed window
-    # window_width = frame1_with_border.shape[1] + frame2_with_border.shape[1]
-    # window_height = max(frame1_with_border.shape[0], frame2_with_border.shape[0])
-    # print("Displayed Window Dimensions:", window_width, "x", window_height)
-
-    # # Print placement of the text
-    # print("Text Position (X, Y):", text_x_pos, ",", text_y_pos)
-
     # Print height of the text
     text_height = cv.getTextSize("Video", cv.FONT_HERSHEY_SIMPLEX, text_size, text_weight)[0][1]
-    # print("Text Height:", text_height)
 
     cv.putText(frame1_with_border, "Video 1", (text_x_pos, text_y_pos), cv.FONT_HERSHEY_SIMPLEX, text_size, (0, 0, 0), text_weight, cv.LINE_AA)
     cv.putText(frame2_with_border, "Video 2", (text_x_pos, text_y_pos), cv.FONT_HERSHEY_SIMPLEX, text_size, (0, 0, 0), text_weight, cv.LINE_AA)
 
     concatenated_frame = np.concatenate((frame1_with_border, frame2_with_border), axis=1)
-    concatenated_frame = rescaleFrame(concatenated_frame, frame_scale)
+    concatenated_frame = rescaleFrame(concatenated_frame, (output_width, output_height))
 
     cv.imshow('Difference Detection', concatenated_frame)
-
-    # print("=============================================================")
 
     return concatenated_frame
 
@@ -362,17 +337,19 @@ def set_display_properties(cap1, resolution, min_contour_area, threshold):
     frame_height = int(cap1.get(cv.CAP_PROP_FRAME_HEIGHT))
     fps = int(cap1.get(cv.CAP_PROP_FPS))
 
+    output_width = None
+    output_height = None
+
     if resolution is not None:
         output_width, output_height = map(int, resolution.split('x'))
 
     # Adjust frame size to better fit current user's screen
     screen_div_by_three = screen_width / 4
     frame_scale = screen_div_by_three / frame_width
-    # print(" FRAME SCALE: ", frame_scale)
 
     # Define border sizes and output video properties
     border_size = int(frame_width/30)
-    if resolution is None:
+    if output_width is None:
         output_width = int((frame_width + (border_size * 2)) * 2 * frame_scale)
 
     text_size = 1
@@ -453,7 +430,7 @@ def set_display_properties(cap1, resolution, min_contour_area, threshold):
     text_tuple = text_dimensions[0]
     text_width = text_tuple[0]
     bottom_border_size = int(text_height * 2.5)
-    if resolution is None:
+    if output_height is None:
         output_height = int((frame_height + border_size + bottom_border_size) * frame_scale)
 
     video_width = frame_width + border_size * 2 
@@ -617,7 +594,7 @@ def main():
                     cv.imshow('Difference Detection', concatenated_frame)
 
                 # Process the contours and update the detected_contour_list
-                process_contours(contours, frame_count, total_frame_count, fps, duration_threshold, logger, difference_images_folder, frame1, frame2, frame_scale, border_size, bottom_border_size, text_x_pos, text_y_pos, text_size, text_weight)
+                process_contours(contours, frame_count, total_frame_count, fps, duration_threshold, logger, difference_images_folder, frame1, frame2, frame_scale, border_size, bottom_border_size, text_x_pos, text_y_pos, text_size, text_weight, output_width, output_height)
 
                 # Write the frame to the output video
                 if save_video:
@@ -637,7 +614,7 @@ def main():
         last_frame1 = frame1
         last_frame2 = frame2
 
-    save_remaining_differences(detected_contour_list, frame_count_list, total_frame_count, fps, duration_threshold, logger, difference_images_folder, last_frame1,  last_frame2, frame_scale, border_size, bottom_border_size, text_x_pos, text_y_pos, text_size, text_weight)
+    save_remaining_differences(detected_contour_list, frame_count_list, total_frame_count, fps, duration_threshold, logger, difference_images_folder, last_frame1,  last_frame2, border_size, bottom_border_size, text_x_pos, text_y_pos, text_size, text_weight, output_width, output_height)
 
     print("Process terminated.")
 
