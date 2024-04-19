@@ -357,7 +357,6 @@ def combine_rectangles(rects):
 
 def set_display_properties(cap1, resolution, min_contour_area, threshold):
     screen_width, screen_height = get_screen_resolution()
-    # print("Screen resolution: {}x{}".format(screen_width, screen_height))
 
     frame_width = int(cap1.get(cv.CAP_PROP_FRAME_WIDTH))
     frame_height = int(cap1.get(cv.CAP_PROP_FRAME_HEIGHT))
@@ -375,7 +374,6 @@ def set_display_properties(cap1, resolution, min_contour_area, threshold):
     border_size = int(frame_width/30)
     if resolution is None:
         output_width = int((frame_width + (border_size * 2)) * 2 * frame_scale)
-    # print("OUTPUT WIDTH: ", output_width)
 
     text_size = 1
     text_weight = 1
@@ -457,34 +455,11 @@ def set_display_properties(cap1, resolution, min_contour_area, threshold):
     bottom_border_size = int(text_height * 2.5)
     if resolution is None:
         output_height = int((frame_height + border_size + bottom_border_size) * frame_scale)
-    # print("Text size: ", text_size)
-    # print("Text weight: ", text_weight)
-    # print("frame width: ", frame_width)
-    # print("frame height: ", frame_height)
-    # print("Output width: ", output_width)
-    # print("Output height: ", output_height)
-    # print("Text width: ", text_width)
-    # print("Text height inside set_display_properties: ", text_height)
-    
 
-    # Define coordinates and properties for text placement
     video_width = frame_width + border_size * 2 
     text_x_offset = int(text_width / 2)
     text_x_pos = int((video_width / 2 - text_x_offset))
     text_y_pos = int(frame_height + border_size + text_height + (frame_height / 30)) 
-    # print(f"text_y_pos = {frame_height} + {border_size} + {text_height} + 10)")
-    # print(f"text y pos with no int = {frame_height + border_size + text_height + 10}")
-    # print(f"text y pos with int = {int(frame_height + border_size + text_height + 10)}")
-
-    # print("text_x_pos = int((video_width / 2 - text_x_offset))")
-    # print(f"Text x position: {text_x_pos} = ({video_width} / 2 - {text_x_offset})")  
-
-    # print("Frame width: ", frame_width)
-    # print("Frame height: ", frame_height)
-    # print("Border size: ", border_size)
-    
-    # print("Text x position: ", text_x_pos)
-    # print("Text y position: ", text_y_pos)
 
     return fps, frame_scale, border_size, bottom_border_size, text_x_pos, text_y_pos, text_size, text_weight, output_width, output_height, frame_width, frame_height, margin, weight, min_contour_area, threshold
 

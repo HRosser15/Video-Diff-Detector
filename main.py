@@ -22,11 +22,25 @@ def main():
     video1_path = args.video1_path
     video2_path = args.video2_path
 
-    # Call video synchronization script
-    sync_output = subprocess.check_output(['python', 'sync.py', video1_path, video2_path], text=True, stderr=subprocess.STDOUT)
 
+
+    # Call video synchronization script, and catch any errors that occur
+    try:
+        sync_output = subprocess.check_output(['python', 'sync.py', video1_path, video2_path], text=True, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        print("Error: Unable to synchronize the videos.")
+        print("Please ensure that both videos have the same resolution.")
+        print("Error details:")
+        print(e.output)
+        return
+    
     # Parse the output string from the video synchronizer
     base_start_frame, alt_start_frame, videos_switched_str = sync_output.strip().split(',')
+    if base_start_frame == 'None' or alt_start_frame == 'None' or videos_switched_str == 'None':
+        print("Error: Unable to find a sync frame. The videos could not be synchronized.")
+        print("Please ensure that the videos have overlapping content and are of sufficient length.")
+        return
+    
     base_start_frame = int(base_start_frame)
     alt_start_frame = int(alt_start_frame)
     videos_switched = videos_switched_str.lower() == 'true'
