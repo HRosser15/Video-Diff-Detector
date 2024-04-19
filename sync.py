@@ -102,9 +102,6 @@ def set_sync_properties(base_vid, threshold, contour_area):
             threshold = 120
         else:
             threshold = 150
-    #     print("Setting sync threshold to: ", threshold)
-    # else:
-    #     print("Sync threshold manually set to: ", threshold)
 
     if contour_area is None:
         if frame_width < 360:
@@ -115,9 +112,6 @@ def set_sync_properties(base_vid, threshold, contour_area):
             contour_area = 50
         else:
             contour_area = 80
-    #     print("Setting Sync contour area to: ", contour_area)
-    # else:
-    #     print("Sync contour area manually set to: ", contour_area)
 
     return threshold, contour_area
 
@@ -192,12 +186,10 @@ def main():
 
     # If still no alt_sync frame is found, return None
     if alt_sync_frame_number is None:
-        # print("Videos could not be synced. No matching frame was found.")
         return None, None, None
 
     # Check if sync_frame_number is also None
     if sync_frame_number is None:
-        # print("Videos could not be synced. No sync frame found in the base video.")
         return None, None, None
 
     # find the minimum frame number
