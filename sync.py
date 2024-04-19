@@ -173,7 +173,7 @@ def main():
 
     # If no alt_sync_frame_number is found, switch the video paths and try again
     if alt_sync_frame_number is None:
-        print("No alt sync frame found, switching video paths...")
+        # print("No alt sync frame found, switching video paths...")
         base_vid.release()
         alt_vid.release()
         video1_path, video2_path = video2_path, video1_path
@@ -192,7 +192,12 @@ def main():
 
     # If still no alt_sync frame is found, return None
     if alt_sync_frame_number is None:
-        print("Videos could not be synced. No matching frame was found.")
+        # print("Videos could not be synced. No matching frame was found.")
+        return None, None, None
+
+    # Check if sync_frame_number is also None
+    if sync_frame_number is None:
+        # print("Videos could not be synced. No sync frame found in the base video.")
         return None, None, None
 
     # find the minimum frame number

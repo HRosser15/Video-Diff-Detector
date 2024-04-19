@@ -28,14 +28,32 @@ class CSVLogger(Logger):
     def __init__(self, file_path):
         self.file_path = file_path
         self.is_header_written = False
+        self.is_details_written = False
+        self.details = []
 
     def log(self, message):
         with open(self.file_path, 'a', newline='') as file:
             writer = csv.writer(file)
             if not self.is_header_written:
-                writer.writerow(["Timestamp", "Duration"])
+                writer.writerow(["Details"])
                 self.is_header_written = True
-            writer.writerow(message)
+            elif message[0] == "User's screen resolution:":
+                writer.writerow(message)
+            elif not self.is_details_written:
+                self.details.append(message)
+            else:
+                writer.writerow(message)
+
+    def write_details(self):
+        with open(self.file_path, 'a', newline='') as file:
+            writer = csv.writer(file)
+            for detail in self.details:
+                writer.writerow(detail)
+            writer.writerow([])
+            writer.writerow([])
+            writer.writerow([])
+            writer.writerow(["Timestamp", "Duration"])
+            self.is_details_written = True
 
 
 class ConsoleLogger(Logger):
@@ -59,27 +77,30 @@ class LoggerFactory:
             return NullLogger()
         
 
-def create_folder_structure(log_directory=None):
+def create_folder_structure(log_directory=None, video1_path=None):
     if log_directory:
         current_datetime_folder = log_directory
     else:
         current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         output_folder = "Output"
-        current_datetime_folder = os.path.join(output_folder, current_datetime)
+        video1_folder = os.path.splitext(os.path.basename(video1_path))[0]  # Get the filename without extension
+        current_datetime_folder = os.path.join(output_folder, video1_folder, current_datetime)
 
     difference_images_folder = os.path.join(current_datetime_folder, "Difference_Images")
     os.makedirs(difference_images_folder, exist_ok=True)
 
     return current_datetime_folder, difference_images_folder
 
+# When video ends, save the remaining differences if they meet the duration threshold.
 def save_remaining_differences(detected_contour_list, frame_count_list, total_frame_count, fps, duration_threshold, logger, difference_images_folder, last_frame1, last_frame2, frame_scale, border_size, bottom_border_size, text_x_pos, text_y_pos, text_size, text_weight):
+    existing_filenames = {}
     for i, detected_contour in enumerate(detected_contour_list):
         duration = total_frame_count - frame_count_list[i]
         if duration > (fps * duration_threshold):
             timestamp = (total_frame_count - duration) / fps
             duration_seconds = duration / fps
             message = f"Difference found at {timestamp:.2f} seconds, present for {duration_seconds:.2f} seconds"
-            logger.log([timestamp, duration_seconds])
+            logger.log([f"{timestamp:.2f}", f"{duration_seconds:.2f}"])
             print(message)
 
             # Draw bounding rectangle with margin around the specific contour on both frames
@@ -99,8 +120,15 @@ def save_remaining_differences(detected_contour_list, frame_count_list, total_fr
             concatenated_frame = np.concatenate((frame1_with_border, frame2_with_border), axis=1)
             concatenated_frame = rescaleFrame(concatenated_frame, frame_scale)
 
-            # Save the concatenated image with the bounding rectangle
-            difference_image_path = os.path.join(difference_images_folder, f"difference_{timestamp:.2f}.jpg")
+            # Generate a unique filename based on timestamp, duration, and an incrementing digit if necessary
+            base_filename = f"difference_{timestamp:.2f}_{duration_seconds:.2f}"
+            if base_filename not in existing_filenames:
+                existing_filenames[base_filename] = 0
+            existing_filenames[base_filename] += 1
+            counter = existing_filenames[base_filename]
+
+            filename = f"{base_filename}-{counter}.jpg" if counter > 1 else f"{base_filename}.jpg"
+            difference_image_path = os.path.join(difference_images_folder, filename)
             cv.imwrite(difference_image_path, concatenated_frame)
 
 def get_screen_resolution():
@@ -140,6 +168,8 @@ def process_contours(contours, frame_count, total_frame_count, fps, duration_thr
     new_detected_contour_list = []
     new_frame_count_list = []
 
+    existing_filenames = {}
+
     # Update the durations for existing contours
     for i, detected_contour in enumerate(detected_contour_list):
         contour_area = cv.contourArea(detected_contour)
@@ -156,7 +186,7 @@ def process_contours(contours, frame_count, total_frame_count, fps, duration_thr
                 timestamp = (total_frame_count - duration) / fps
                 duration_seconds = duration / fps
                 message = f"Difference found at {timestamp:.2f} seconds, present for {duration_seconds:.2f} seconds"
-                logger.log([timestamp, duration_seconds])
+                logger.log([f"{timestamp:.2f}", f"{duration_seconds:.2f}"])
                 print(message)
 
                 x, y, w, h = cv.boundingRect(detected_contour)
@@ -173,7 +203,15 @@ def process_contours(contours, frame_count, total_frame_count, fps, duration_thr
                 concatenated_frame = np.concatenate((frame1_with_border, frame2_with_border), axis=1)
                 concatenated_frame = rescaleFrame(concatenated_frame, frame_scale)
 
-                difference_image_path = os.path.join(difference_images_folder, f"difference_{timestamp:.2f}.jpg")
+                # Generate a unique filename based on timestamp, duration, and an incrementing digit if necessary
+                base_filename = f"difference_{timestamp:.2f}_{duration_seconds:.2f}"
+                if base_filename not in existing_filenames:
+                    existing_filenames[base_filename] = 0
+                existing_filenames[base_filename] += 1
+                counter = existing_filenames[base_filename]
+
+                filename = f"{base_filename}-{counter}.jpg" if counter > 1 else f"{base_filename}.jpg"
+                difference_image_path = os.path.join(difference_images_folder, filename)
                 cv.imwrite(difference_image_path, concatenated_frame)
 
     # Add new contours
@@ -360,13 +398,13 @@ def set_display_properties(cap1, resolution, min_contour_area, threshold):
 
     if min_contour_area is None:
         if frame_width < 360:
-            min_contour_area = 60
+            min_contour_area = 20
         elif frame_width < 720:
-            min_contour_area = 120
+            min_contour_area = 50
         elif frame_width < 1080:
-            min_contour_area = 200
+            min_contour_area = 100
         else:
-            min_contour_area = 250
+            min_contour_area = 150
         print("Setting minimum contour area to: ", min_contour_area)
     else:
         print("Minimum contour area manually set to: ", min_contour_area)
@@ -375,11 +413,11 @@ def set_display_properties(cap1, resolution, min_contour_area, threshold):
         if frame_width < 360:
             threshold = 15
         elif frame_width < 720:
-            threshold = 25
+            threshold = 20
         elif frame_width < 1080:
-            threshold = 35
+            threshold = 25
         else:
-            threshold = 50
+            threshold = 30
         print("Setting threshold to: ", threshold)
     else:
         print("Threshold manually set to: ", threshold)
@@ -528,6 +566,13 @@ def main():
     if not (cap1.isOpened() and cap2.isOpened()):
         print("Error: Unable to open videos.")
         return
+    
+    fps1 = int(cap1.get(cv.CAP_PROP_FPS))
+    fps2 = int(cap2.get(cv.CAP_PROP_FPS))
+    frame_width1 = int(cap1.get(cv.CAP_PROP_FRAME_WIDTH))
+    frame_height1 = int(cap1.get(cv.CAP_PROP_FRAME_HEIGHT))
+    frame_width2 = int(cap2.get(cv.CAP_PROP_FRAME_WIDTH))
+    frame_height2 = int(cap2.get(cv.CAP_PROP_FRAME_HEIGHT))
 
     fps, frame_scale, border_size, bottom_border_size, text_x_pos, text_y_pos, text_size, text_weight, output_width, output_height, frame_width, frame_height, MARGIN, WEIGHT, min_contour_area, threshold = set_display_properties(cap1, args.resolution, min_contour_area, threshold)
     
@@ -553,13 +598,28 @@ def main():
         log_directory = None
         csv_filename = "DifferenceLog.csv"
 
-    current_datetime_folder, difference_images_folder = create_folder_structure(log_directory)
+    current_datetime_folder, difference_images_folder = create_folder_structure(log_directory, args.video1_path)
     output_video_path = os.path.join(current_datetime_folder, "Output_Video.mp4")
     csv_path = os.path.join(current_datetime_folder, csv_filename)
 
     logger = LoggerFactory.create_logger('csv', csv_path)
-    
 
+    screen_width, screen_height = get_screen_resolution()
+    logger.log(["Details"])
+    logger.log(["User's screen resolution:", f"{screen_width}x{screen_height}"])
+    logger.log(["Base video resolution:", f"{frame_width1}x{frame_height1}"])
+    logger.log(["Base video frame rate (fps):", fps1])
+    logger.log(["Delta video resolution:", f"{frame_width2}x{frame_height2}"])
+    logger.log(["Delta video frame rate (fps):", fps2])
+    logger.log(["Delta video frame rate (fps):", fps2])
+    logger.log(["Base video starting frame:", base_start_frame])
+    logger.log(["Delta video starting frame:", alt_start_frame])
+    logger.log(["Set threshold:", threshold])
+    logger.log(["Set minimum contour area:", min_contour_area])
+    logger.log(["Set duration threshold (in seconds):", duration_threshold])
+    logger.log(["Output image (or video) resolution:", f"{output_width}x{output_height}"])
+
+    logger.write_details()
     print("Duration threshold (in seconds): ", duration_threshold)
     
     while True:
