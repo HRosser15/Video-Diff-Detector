@@ -76,6 +76,8 @@ Potentially More TBD:
 - Enter in `python main.py <video1_file_name.ext> <video2_file_name.ext>`
   -- Replace `<video1_file_name.ext>` and `<video2_file_name.ext>` with your desired file names.
   -- By default, the application will add the necessary filepath to the beginning of these inputs so they are retrieved from `Video-Diff-Detector/Videos/`
+- Arguments can be used to alter how sensitive the program is, where it logs the output, and how the annotations look. Refer to the User Manual, Section VI, Subsection A to see a full list of arguments and how to use them.
+- Output logs and images will be saved in a folder called Output. They will be organized first by a folder named after the base video used in a specific isntance, then by the current date and time that the application instance was run.
 
 ## To Begin Contributing
 
