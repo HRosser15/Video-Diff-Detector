@@ -385,13 +385,13 @@ def set_display_properties(cap1, resolution, min_contour_area, threshold):
 
     if threshold is None:
         if frame_width < 360:
-            threshold = 15
-        elif frame_width < 720:
-            threshold = 20
-        elif frame_width < 1080:
-            threshold = 25
-        else:
             threshold = 30
+        elif frame_width < 720:
+            threshold = 45
+        elif frame_width < 1080:
+            threshold = 55
+        else:
+            threshold = 60
         print("Setting threshold to: ", threshold)
     else:
         print("Threshold manually set to: ", threshold)

@@ -1,0 +1,27 @@
+Details
+User's screen resolution:,2560x1440
+Base video resolution:,312x360
+Base video frame rate (fps):,30
+Delta video resolution:,312x360
+Delta video frame rate (fps):,30
+Delta video frame rate (fps):,30
+Base video starting frame:,2
+Delta video starting frame:,0
+Set threshold:,30
+Set minimum contour area:,20
+Set duration threshold (in seconds):,1
+Output image (or video) resolution:,1362x871
+
+
+
+Timestamp,Duration
+24.00,5.60
+43.17,4.43
+34.60,19.00
+24.77,46.53
+24.87,46.43
+24.93,46.37
+24.93,46.37
+24.97,46.33
+24.97,46.33
+24.97,46.33

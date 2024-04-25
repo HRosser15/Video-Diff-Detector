@@ -16,6 +16,8 @@ def main():
     parser.add_argument('--margin', type=int, help='Margin around the bounding boxes (default: (based on input video dimensions))')
     parser.add_argument('-b', '--box-color', default='yellow', help='Set the color of the bounding boxes (default: yellow).')
     parser.add_argument('-nv', '--no-visualization', action='store_true', help='Disable visualization of the analysis process')
+    parser.add_argument('-stf', '--sync-threshold-find', type=int, help='Set the threshold value finding a reference frame in the base video (default: based on video resolution).')
+    parser.add_argument('-stm', '--sync-threshold-match', type=int, help='Set the threshold value finding a matching frame in the delta video (default: based on video resolution).')
     args = parser.parse_args()
 
     # Get video paths from command line arguments
