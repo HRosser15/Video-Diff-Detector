@@ -372,11 +372,11 @@ def set_display_properties(cap1, resolution, min_contour_area, threshold):
 
     if min_contour_area is None:
         if frame_width < 360:
-            min_contour_area = 20
+            min_contour_area = 10
         elif frame_width < 720:
-            min_contour_area = 50
+            min_contour_area = 25
         elif frame_width < 1080:
-            min_contour_area = 100
+            min_contour_area = 40
         else:
             min_contour_area = 150
         print("Setting minimum contour area to: ", min_contour_area)
@@ -385,13 +385,13 @@ def set_display_properties(cap1, resolution, min_contour_area, threshold):
 
     if threshold is None:
         if frame_width < 360:
-            threshold = 15
+            threshold = 10
         elif frame_width < 720:
-            threshold = 20
+            threshold = 40
         elif frame_width < 1080:
-            threshold = 25
+            threshold = 60
         else:
-            threshold = 30
+            threshold = 80
         print("Setting threshold to: ", threshold)
     else:
         print("Threshold manually set to: ", threshold)
@@ -457,7 +457,7 @@ def main():
     parser.add_argument('-c', '--contour-area', type=int, help='Set the minimum contour area threshold for contour filtering (default: 100).')
     parser.add_argument('-r', '--resolution', help='Set the resolution for the output video (e.g., 1280x720).')
     parser.add_argument('-l', '--log-file', help='Specify the path to a log file for writing log messages.')
-    parser.add_argument('-d', '--duration', type=int, default=1, help='Specify the duration (in seconds) a difference must be present to be logged (default: 1 second).')
+    parser.add_argument('-d', '--duration', type=int, default=2, help='Specify the duration (in seconds) a difference must be present to be logged (default: 2 second).')
     parser.add_argument('-b', '--box-color', default='yellow', help='Set the color of the bounding boxes (default: yellow).')
     parser.add_argument('-nv', '--no-visualization', action='store_true', help='Disable visualization of the analysis process')
     args = parser.parse_args()
