@@ -34,8 +34,12 @@ Python 3.12.1:
 OpenCV:
 
 - in your command prompt, terminal, or VSCode terminal, run
-`pip install opencv-contrib-python`
-<!--- once it finishes, run **pip install caer** -->
+  `pip install opencv-contrib-python`
+
+NumPy:
+
+- in your command prompt, terminal, or VSCode terminal, run
+  `pip install numpy`
 
 VSCode:
 
@@ -45,15 +49,11 @@ Git:
 
 - Check if you have git installed by using
   `git --version`
-- If you don't have it or don't have the most recent version, download and install from the offical Git website: https://git-scm.com/downloads
+- If you don't have it or don't have the most recent version, download and install it from the offical Git website: https://git-scm.com/downloads
 
 VSCode Python Extension:
 
 - In VSCode, click the extensions button on the left, search for `Python`, and install it.
-
-Potentially More TBD:
-
-- This will be updated as the application is updated.
 
 ## Cloning the Repository
 
@@ -74,8 +74,10 @@ Potentially More TBD:
 
 - In a terminal, navigate to your cloned repo, where your current directory should be `Video-Diff-Detector`
 - Enter in `python main.py <video1_file_name.ext> <video2_file_name.ext>`
-  -- Replace `<video1_file_name.ext>` and `<video2_file_name.ext>` with your desired file names.
-  -- By default, the application will add the necessary filepath to the beginning of these inputs so they are retrieved from `Video-Diff-Detector/Videos/`
+- Replace `<video1_file_name.ext>` and `<video2_file_name.ext>` with your desired file names.
+- By default, the application will add the necessary filepath to the beginning of these inputs so they are retrieved from `Video-Diff-Detector/Videos/`
+- Arguments can be used to alter how sensitive the program is, where it logs the output, and how the annotations look. Refer to the User Manual, Section VI, Subsection A to see a full list of arguments and how to use them.
+- Output logs and images will be saved in a folder called Output. They will be organized first by a folder named after the base video used in a specific isntance, then by the current date and time that the application instance was run
 
 ## To Begin Contributing
 
