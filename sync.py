@@ -11,13 +11,15 @@ def find_frame_difference(gray1, frame2, threshold_find):
     diff = cv.absdiff(gray1, gray2)
 
     # Create a binary image, setting pixels above a threshold to white and below to black
-    _, thresholded_diff = cv.threshold(diff, 15, 255, cv.THRESH_BINARY)
+    _, thresholded_diff = cv.threshold(diff, threshold_find, 255, cv.THRESH_BINARY)
+    cv.imshow('thresholded_diff', thresholded_diff)
+    cv.waitKey(1)
 
     # Count the number of non-black pixels in the thresholded_diff
     non_zero_count = np.count_nonzero(thresholded_diff)
 
     # Return true if more than "threshold_find" non-black pixels are found
-    return non_zero_count > threshold_find
+    return non_zero_count > 0
 
 def find_matching_frame(gray1, frame2, threshold_match):
     # Convert frames to grayscale for simplicity
@@ -27,7 +29,9 @@ def find_matching_frame(gray1, frame2, threshold_match):
     diff = cv.absdiff(gray1, gray2)
 
     # Create a binary image, setting pixels above a threshold to white and below to black
-    _, thresholded_diff = cv.threshold(diff, 15, 255, cv.THRESH_BINARY)
+    _, thresholded_diff = cv.threshold(diff, threshold_match, 255, cv.THRESH_BINARY)
+    cv.imshow('finding match', thresholded_diff)
+    cv.waitKey(30)
 
     # Count the number of non-black pixels in the thresholded_diff
     non_zero_count = np.count_nonzero(thresholded_diff)
@@ -95,23 +99,23 @@ def set_sync_properties(base_vid, threshold_find, threshold_match):
 
     if threshold_find is None:
         if frame_width < 360:
-            threshold_find = 60
+            threshold_find = 100
         elif frame_width < 720:
-            threshold_find = 80
+            threshold_find = 200
         elif frame_width < 1080:
-            threshold_find = 120
+            threshold_find = 280
         else:
-            threshold_find = 150
+            threshold_find = 350
 
     if threshold_match is None:
         if frame_width < 360:
-            threshold_match = 20
+            threshold_match = 2
         elif frame_width < 720:
-            threshold_match = 35
+            threshold_match = 5
         elif frame_width < 1080:
-            threshold_match = 50
+            threshold_match = 10
         else:
-            threshold_match = 80
+            threshold_match = 15
 
     return threshold_find, threshold_match
 

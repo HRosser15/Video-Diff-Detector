@@ -11,7 +11,7 @@ def main():
     parser.add_argument('-c', '--contour-area', type=int, help='Set the minimum contour area threshold for contour filtering (default: 100).')
     parser.add_argument('-r', '--resolution', help='Set the resolution for the output video (e.g., 1280x720).')
     parser.add_argument('-l', '--log-file', help='Specify the path to a log file for writing log messages.')
-    parser.add_argument('-d', '--duration', default=2, help='Specify the duration (in seconds) a difference must be present to be logged (default: 2 second).')
+    parser.add_argument('-d', '--duration', default=2, help='Specify the duration (in seconds) a difference must be present to be logged (default: 2 seconds).')
     parser.add_argument('--weight', type=int, help='Weight of the bounding boxes (default: (based on input video dimensions))')
     parser.add_argument('--margin', type=int, help='Margin around the bounding boxes (default: (based on input video dimensions))')
     parser.add_argument('-b', '--box-color', default='yellow', help='Set the color of the bounding boxes (default: yellow).')
