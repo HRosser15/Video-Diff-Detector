@@ -3,7 +3,7 @@ import numpy as np
 import sys
 import argparse
 
-def find_frame_difference(gray1, frame2, threshold):
+def find_frame_difference(gray1, frame2, threshold_find):
     # Convert frames to grayscale for simplicity
     gray2 = cv.cvtColor(frame2, cv.COLOR_BGR2GRAY)  
 
@@ -11,7 +11,7 @@ def find_frame_difference(gray1, frame2, threshold):
     diff = cv.absdiff(gray1, gray2)
 
     # Create a binary image, setting pixels above a threshold to white and below to black
-    _, thresholded_diff = cv.threshold(diff, threshold, 255, cv.THRESH_BINARY)
+    _, thresholded_diff = cv.threshold(diff, threshold_find, 255, cv.THRESH_BINARY)
 
     # Count the number of non-black pixels in the thresholded_diff
     non_zero_count = np.count_nonzero(thresholded_diff)
@@ -19,7 +19,7 @@ def find_frame_difference(gray1, frame2, threshold):
     # Return true if more than "threshold" non-black pixels are found
     return non_zero_count > 0
 
-def find_matching_frame(gray1, frame2, threshold):
+def find_matching_frame(gray1, frame2, threshold_match):
     # Convert frames to grayscale for simplicity
     gray2 = cv.cvtColor(frame2, cv.COLOR_BGR2GRAY)  
 
@@ -27,15 +27,15 @@ def find_matching_frame(gray1, frame2, threshold):
     diff = cv.absdiff(gray1, gray2)
 
     # Create a binary image, setting pixels above a threshold to white and below to black
-    _, thresholded_diff = cv.threshold(diff, threshold, 255, cv.THRESH_BINARY)
+    _, thresholded_diff = cv.threshold(diff, threshold_match, 255, cv.THRESH_BINARY)
 
     # Count the number of non-black pixels in the thresholded_diff
     non_zero_count = np.count_nonzero(thresholded_diff)
 
     # Return true if less than "threshold" non-black pixels are found
-    return non_zero_count < threshold
+    return non_zero_count < threshold_match
 
-def find_sync_frame_number(first_frame, base_vid, threshold):
+def find_sync_frame_number(first_frame, base_vid, threshold_find):
     # Reset video capture to the beginning
     base_vid.set(cv.CAP_PROP_POS_FRAMES, 0)
 
@@ -52,7 +52,7 @@ def find_sync_frame_number(first_frame, base_vid, threshold):
         frame_number += 1
 
         # If a non-matching frame is found, return the current frame number
-        if find_frame_difference(first_frame, frame, threshold):
+        if find_frame_difference(first_frame, frame, threshold_find):
             return frame_number
 
     return None
@@ -70,7 +70,7 @@ def get_frame_at_number(frame_number, vid):
     else:
         return None
 
-def find_matching_frame_number(sync_frame, alt_vid, threshold):
+def find_matching_frame_number(sync_frame, alt_vid, threshold_match):
     frame_number = 0
 
     while True:
@@ -84,49 +84,49 @@ def find_matching_frame_number(sync_frame, alt_vid, threshold):
         frame_number += 1
 
         # Return the frame number if a matching frame is found
-        if find_matching_frame(sync_frame, frame, threshold):
+        if find_matching_frame(sync_frame, frame, threshold_match):
             return frame_number
 
     return None
 
-def set_sync_properties(base_vid, threshold, contour_area):
+def set_sync_properties(base_vid, threshold_find, threshold_match):
     frame_width = int(base_vid.get(cv.CAP_PROP_FRAME_WIDTH))
     frame_height = int(base_vid.get(cv.CAP_PROP_FRAME_HEIGHT))
 
-    if threshold is None:
+    if threshold_find is None:
         if frame_width < 360:
-            threshold = 60
+            threshold_find = 50
         elif frame_width < 720:
-            threshold = 80
+            threshold_find = 80
         elif frame_width < 1080:
-            threshold = 120
+            threshold_find = 100
         else:
-            threshold = 150
+            threshold_find = 130
 
-    if contour_area is None:
+    if threshold_match is None:
         if frame_width < 360:
-            contour_area = 20
+            threshold_match = 15
         elif frame_width < 720:
-            contour_area = 35
+            threshold_match = 30
         elif frame_width < 1080:
-            contour_area = 50
+            threshold_match = 45
         else:
-            contour_area = 80
+            threshold_match = 55
 
-    return threshold, contour_area
+    return threshold_find, threshold_match
 
 def main():
     parser = argparse.ArgumentParser(description='Video Synchronization')
     parser.add_argument('video1_path', help='Path to the first video file')
     parser.add_argument('video2_path', help='Path to the second video file')
-    parser.add_argument('-t', '--threshold', type=int, help='Set the threshold value for pixel-wise difference calculation (default: based on video resolution).')
-    parser.add_argument('-c', '--contour-area', type=int, help='Set the minimum contour area threshold for contour filtering (default: based on video resolution).')
+    parser.add_argument('-stf', '--sync-threshold-find', type=int, help='Set the threshold value finding a reference frame in the base video (default: based on video resolution).')
+    parser.add_argument('-stm', '--sync-threshold-match', type=int, help='Set the threshold value finding a matching frame in the delta video (default: based on video resolution).') 
     args = parser.parse_args()
 
     video1_path = args.video1_path
     video2_path = args.video2_path
-    threshold = args.threshold
-    contour_area = args.contour_area
+    threshold_find = args.sync_threshold_find
+    threshold_match = args.sync_threshold_match
 
     base_video_path = 'Videos/'
     full_video1_path = base_video_path + video1_path
@@ -145,7 +145,7 @@ def main():
     alt_vid.set(cv.CAP_PROP_FPS, base_frame_rate)
 
     # Set sync properties based on video resolution or user input
-    threshold, contour_area = set_sync_properties(base_vid, threshold, contour_area)
+    threshold_find, threshold_match = set_sync_properties(base_vid, threshold_find, threshold_match)
 
     # Capture the first frame of the base video
     ret, first_frame = base_vid.read()
@@ -154,7 +154,7 @@ def main():
     first_frame = cv.cvtColor(first_frame, cv.COLOR_BGR2GRAY)  
 
     # Find frame numbers where videos are synchronized
-    sync_frame_number = find_sync_frame_number(first_frame, base_vid, threshold)
+    sync_frame_number = find_sync_frame_number(first_frame, base_vid, threshold_find)
 
     # Get the frame at the sync_frame_number
     sync_frame = get_frame_at_number(sync_frame_number, base_vid)
@@ -163,7 +163,7 @@ def main():
     sync_frame = cv.cvtColor(sync_frame, cv.COLOR_BGR2GRAY)
     
     # Find the frame number in the alt video that contains the sync frame
-    alt_sync_frame_number = find_matching_frame_number(sync_frame, alt_vid, contour_area)
+    alt_sync_frame_number = find_matching_frame_number(sync_frame, alt_vid, threshold_match)
 
     # If no alt_sync_frame_number is found, switch the video paths and try again
     if alt_sync_frame_number is None:
@@ -176,10 +176,10 @@ def main():
         base_vid.set(cv.CAP_PROP_FPS, base_frame_rate)
         ret, first_frame = base_vid.read()
         first_frame = cv.cvtColor(first_frame, cv.COLOR_BGR2GRAY)
-        sync_frame_number = find_sync_frame_number(first_frame, base_vid, threshold)
+        sync_frame_number = find_sync_frame_number(first_frame, base_vid, threshold_find)
         sync_frame = get_frame_at_number(sync_frame_number, base_vid)
         sync_frame = cv.cvtColor(sync_frame, cv.COLOR_BGR2GRAY)
-        alt_sync_frame_number = find_matching_frame_number(sync_frame, alt_vid, contour_area)
+        alt_sync_frame_number = find_matching_frame_number(sync_frame, alt_vid, threshold_match)
         videos_switched = True
     else:
         videos_switched = False
@@ -202,10 +202,9 @@ def main():
     base_vid.set(cv.CAP_PROP_POS_FRAMES, base_start_frame)
     alt_vid.set(cv.CAP_PROP_POS_FRAMES, alt_start_frame)
 
-    return base_start_frame, alt_start_frame, videos_switched
+    return base_start_frame, alt_start_frame, videos_switched, threshold_find, threshold_match
 
 if __name__ == '__main__':
-    base_start_frame, alt_start_frame, videos_switched = main()
-    # Format the output as a comma-separated string
-    output = f"{base_start_frame},{alt_start_frame},{videos_switched}"
+    base_start_frame, alt_start_frame, videos_switched, threshold_find, threshold_match = main()
+    output = f"{base_start_frame},{alt_start_frame},{videos_switched},{threshold_find},{threshold_match}"
     print(output)
