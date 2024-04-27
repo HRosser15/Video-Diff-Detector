@@ -25,7 +25,6 @@ def main():
     video2_path = args.video2_path
 
 
-
     sync_command = ['python', 'sync.py', video1_path, video2_path]
     if args.sync_threshold_find:
         sync_command.extend(['-stf', str(args.sync_threshold_find)])
@@ -81,6 +80,8 @@ def main():
     if args.no_visualization:
         diff_command.append('-nv')
     diff_command.extend(['-d', str(args.duration)])
+    if args.box_color:
+        diff_command.extend(['--box-color', args.box_color])
 
     subprocess.run(diff_command)
 
