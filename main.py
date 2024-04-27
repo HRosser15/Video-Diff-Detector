@@ -18,6 +18,7 @@ def main():
     parser.add_argument('-nv', '--no-visualization', action='store_true', help='Disable visualization of the analysis process')
     parser.add_argument('-stf', '--sync-threshold-find', type=int, help='Set the threshold value finding a reference frame in the base video (default: based on video resolution).')
     parser.add_argument('-stm', '--sync-threshold-match', type=int, help='Set the threshold value finding a matching frame in the delta video (default: based on video resolution).') 
+    parser.add_argument('-fs', '--frame-skip', type=int, default=1, help='Number of frames to skip between each processed frame (default: 1)')
     args = parser.parse_args()
 
     # Get video paths from command line arguments
@@ -82,6 +83,7 @@ def main():
     diff_command.extend(['-d', str(args.duration)])
     if args.box_color:
         diff_command.extend(['--box-color', args.box_color])
+    diff_command.extend(['--frame-skip', str(args.frame_skip)])
 
     subprocess.run(diff_command)
 

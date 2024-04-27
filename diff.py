@@ -92,7 +92,9 @@ def create_folder_structure(log_directory=None, video1_path=None):
     return current_datetime_folder, difference_images_folder
 
 # When video ends, save the remaining differences if they meet the duration threshold.
-def save_remaining_differences(detected_contour_list, frame_count_list, total_frame_count, fps, duration_threshold, logger, difference_images_folder, last_frame1, last_frame2, border_size, bottom_border_size, text_x_pos, text_y_pos, text_size, text_weight, output_width, output_height):
+def save_remaining_differences(detected_contour_list, frame_count_list, total_frame_count, fps, duration_threshold, logger,
+                               difference_images_folder, last_processed_frame1, last_processed_frame2, border_size,
+                               bottom_border_size, text_x_pos, text_y_pos, text_size, text_weight, output_width, output_height):
     existing_filenames = {}
     for i, detected_contour in enumerate(detected_contour_list):
         duration = total_frame_count - frame_count_list[i]
@@ -105,8 +107,8 @@ def save_remaining_differences(detected_contour_list, frame_count_list, total_fr
 
             # Draw bounding rectangle with margin around the specific contour on both frames
             x, y, w, h = cv.boundingRect(detected_contour)
-            frame1_with_rect = last_frame1.copy()
-            frame2_with_rect = last_frame2.copy()
+            frame1_with_rect = last_processed_frame1.copy()
+            frame2_with_rect = last_processed_frame2.copy()
             cv.rectangle(frame1_with_rect, (x - MARGIN, y - MARGIN), (x + w + MARGIN, y + h + MARGIN), BBOX_COLOR, WEIGHT)
             cv.rectangle(frame2_with_rect, (x - MARGIN, y - MARGIN), (x + w + MARGIN, y + h + MARGIN), BBOX_COLOR, WEIGHT)
 
@@ -156,7 +158,9 @@ def handle_key_events(key, paused):
             print("Resuming...")
     return False, paused
 
-def process_contours(contours, frame_count, total_frame_count, fps, duration_threshold, logger, difference_images_folder, frame1, frame2, frame_scale, border_size, bottom_border_size, text_x_pos, text_y_pos, text_size, text_weight, output_width, output_height):
+def process_contours(contours, frame_count, total_frame_count, fps, duration_threshold, logger, difference_images_folder,
+                     last_processed_frame1, last_processed_frame2, frame_scale, border_size, bottom_border_size,
+                     text_x_pos, text_y_pos, text_size, text_weight, output_width, output_height, frame1, frame2):
     global detected_contour_list
     global frame_count_list
     global previous_frame1
@@ -187,8 +191,8 @@ def process_contours(contours, frame_count, total_frame_count, fps, duration_thr
                 print(message)
 
                 x, y, w, h = cv.boundingRect(detected_contour)
-                frame1_with_rect = previous_frame1.copy()
-                frame2_with_rect = previous_frame2.copy()
+                frame1_with_rect = last_processed_frame1.copy()
+                frame2_with_rect = last_processed_frame2.copy()
                 cv.rectangle(frame1_with_rect, (x - MARGIN, y - MARGIN), (x + w + MARGIN, y + h + MARGIN), BBOX_COLOR, WEIGHT)
                 cv.rectangle(frame2_with_rect, (x - MARGIN, y - MARGIN), (x + w + MARGIN, y + h + MARGIN), BBOX_COLOR, WEIGHT)
 
@@ -462,6 +466,7 @@ def main():
     parser.add_argument('-d', '--duration', type=int, default=2, help='Specify the duration (in seconds) a difference must be present to be logged (default: 2 seconds).')
     parser.add_argument('-b', '--box-color', default='yellow', help='Set the color of the bounding boxes (default: yellow).')
     parser.add_argument('-nv', '--no-visualization', action='store_true', help='Disable visualization of the analysis process')
+    parser.add_argument('-fs', '--frame-skip', type=int, default=1, help='Number of frames to skip between each processed frame (default: 1)')
     args = parser.parse_args()
     
     global BBOX_COLOR
@@ -536,6 +541,8 @@ def main():
     frame_count = 0
     total_frame_count = 0
     paused = False
+    last_processed_frame1 = None
+    last_processed_frame2 = None
 
     codec = cv.VideoWriter_fourcc(*'mp4v')
     save_video = args.video.lower() == 'true'
@@ -578,8 +585,14 @@ def main():
     
     while True:
         if not paused:
-            ret1, frame1 = cap1.read()
-            ret2, frame2 = cap2.read()
+            for _ in range(args.frame_skip):
+                ret1, frame1 = cap1.read()
+                ret2, frame2 = cap2.read()
+
+                if not (ret1 and ret2):
+                    print("End of video reached.")
+                    break
+
 
             if not (ret1 and ret2):
                 print("End of video reached.")
@@ -592,18 +605,24 @@ def main():
             if contours:
                 # Visualize the differences
                 if not args.no_visualization:
-                    concatenated_frame = visualize_difference(frame1, frame2, diff_image, contours, cap1, fps, frame_scale, border_size, bottom_border_size, text_x_pos, text_y_pos, text_size, text_weight, output_width, output_height, frame_width, frame_height)
+                    concatenated_frame = visualize_difference(frame1, frame2, diff_image, contours, cap1, fps, frame_scale, 
+                                                              border_size, bottom_border_size, text_x_pos, text_y_pos, text_size, 
+                                                              text_weight, output_width, output_height, frame_width, frame_height)
                     cv.imshow('Difference Detection', concatenated_frame)
 
                 # Process the contours and update the detected_contour_list
-                process_contours(contours, frame_count, total_frame_count, fps, duration_threshold, logger, difference_images_folder, frame1, frame2, frame_scale, border_size, bottom_border_size, text_x_pos, text_y_pos, text_size, text_weight, output_width, output_height)
+                process_contours(contours, frame_count, total_frame_count, fps, args.duration, logger, difference_images_folder,
+                                 last_processed_frame1, last_processed_frame2, frame_scale, border_size, bottom_border_size,
+                                 text_x_pos, text_y_pos, text_size, text_weight, output_width, output_height, frame1, frame2)
 
                 # Write the frame to the output video
                 if save_video:
                     write_output_video(concatenated_frame, output_video)
 
                 # Increment the frame count
-                frame_count += 1
+                frame_count += args.frame_skip
+                last_processed_frame1 = frame1.copy()
+                last_processed_frame2 = frame2.copy()
 
         # Handle key events to pause, resume, or quit
         if not args.no_visualization:
@@ -612,11 +631,13 @@ def main():
             if quit_program:
                 break
 
-        total_frame_count += 1
+        total_frame_count += args.frame_skip
         last_frame1 = frame1
         last_frame2 = frame2
 
-    save_remaining_differences(detected_contour_list, frame_count_list, total_frame_count, fps, duration_threshold, logger, difference_images_folder, last_frame1,  last_frame2, border_size, bottom_border_size, text_x_pos, text_y_pos, text_size, text_weight, output_width, output_height)
+    save_remaining_differences(detected_contour_list, frame_count_list, total_frame_count, fps, args.duration, logger,
+                               difference_images_folder, last_processed_frame1, last_processed_frame2, border_size,
+                               bottom_border_size, text_x_pos, text_y_pos, text_size, text_weight, output_width, output_height)
 
     print("Process terminated.")
 
